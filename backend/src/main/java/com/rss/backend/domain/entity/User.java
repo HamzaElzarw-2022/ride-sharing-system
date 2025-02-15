@@ -1,5 +1,6 @@
-package com.rss.backend.domain;
+package com.rss.backend.domain.entity;
 
+import com.rss.backend.domain.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,34 +28,42 @@ public class User implements UserDetails {
     private String email;
     private String password;
 
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Rider rider;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Driver driver;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Return the user's roles/permissions as a list of GrantedAuthority
-        return List.of(new SimpleGrantedAuthority("ROLE_USER")); // Example role
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override
     public String getUsername() {
-        return email; // Use email as the username
+        return email;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return true; // Account never expires
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true; // Account is never locked
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true; // Credentials never expire
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return true; // Account is always enabled
+        return true;
     }
 }
