@@ -19,6 +19,9 @@ public class Driver {
 
     private String licenseNumber;
     private String vehicleDetails;
+    private Integer credit;
+    private Integer rating;
+    private Integer rateCount;
 
     @OneToOne
     @JoinColumn(name = "user_id")

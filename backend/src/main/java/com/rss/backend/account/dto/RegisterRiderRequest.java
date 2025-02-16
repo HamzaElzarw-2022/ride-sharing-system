@@ -10,16 +10,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegisterRequest {
+public class RegisterRiderRequest {
     private String username;
     private String email;
     private String password;
     private Role role;
 
-    // Rider-specific fields
     private String preferredPaymentMethod;
-
-    // Driver-specific fields
-    private String licenseNumber;
-    private String vehicleDetails;
 }

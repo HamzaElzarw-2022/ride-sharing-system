@@ -20,6 +20,6 @@ public class RiderController {
     public String getRiderDetails(@PathVariable Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        return "Rider: " + user.getUsername() + ", Payment Method: " + user.getRider().getPreferredPaymentMethod();
+        return "Rider: " + user.getUsername() + ", Payment Method: " + user.getRider().getDebt();
     }
 }
