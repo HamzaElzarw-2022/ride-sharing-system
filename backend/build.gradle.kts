@@ -22,6 +22,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.4")
+    implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("org.projectlombok:lombok")
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
@@ -31,7 +32,7 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
-    //H2 Database
+    //Database
     runtimeOnly("com.h2database:h2")
     runtimeOnly("org.postgresql:postgresql")
 
