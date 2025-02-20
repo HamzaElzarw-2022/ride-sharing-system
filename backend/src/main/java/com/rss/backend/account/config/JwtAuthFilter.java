@@ -1,5 +1,6 @@
 package com.rss.backend.account.config;
 
+import com.rss.backend.account.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

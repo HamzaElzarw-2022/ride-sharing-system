@@ -1,6 +1,5 @@
 package com.rss.backend.account.service;
 
-import com.rss.backend.account.config.JwtService;
 import com.rss.backend.account.dto.AuthRequest;
 import com.rss.backend.account.dto.AuthResponse;
 import com.rss.backend.account.dto.RegisterDriverRequest;

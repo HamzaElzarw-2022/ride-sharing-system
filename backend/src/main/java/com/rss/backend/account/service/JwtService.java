@@ -1,4 +1,4 @@
-package com.rss.backend.account.config;
+package com.rss.backend.account.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

@@ -1,6 +1,6 @@
-# RideSharing System 
+# RideSharing System (in dev)
 
-A modular **ride-sharing system simulation** with a **custom-built map**, real-time **trip matching**, and **driver movement simulation**. This project is currently in development.
+A modular **ride-sharing system simulation** with a **custom-built map** from [street-map-builder](https://github.com/HamzaElzarw-2022/street-map-builder), real-time **trip matching**, and **driver movement simulation**. This project is currently in development.
 
 A project for fun & self development.
 
@@ -28,7 +28,7 @@ ride-sharing-system/
 ```
 
 ## ✨ Planned Features
-- **Custom Map System** → Graph-based roads & routing built from street-map-builder
+- **Custom Map System** → Graph-based roads & routing built from [street-map-builder](https://github.com/HamzaElzarw-2022/street-map-builder)
 - **Driver & Rider Simulation** → Real-time movement updates
 - **Rider App** → Option for interacting with simulation as a rider
 - **Trip Matching & Billing** → Tracks rides & fares
@@ -38,4 +38,5 @@ ride-sharing-system/
 - **Java (Spring Boot)** → Backend services
 - **React & React Native** → User & monitoring interfaces
 - **Grafana & Prometheus** → System monitoring
-- **Docker & Kubernetes (optional)** → Deployment  
+- **Swagger** → API Documentation
+- **Docker** → Deployment
