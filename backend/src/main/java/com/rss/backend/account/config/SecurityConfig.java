@@ -27,6 +27,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth // Lambda for authorization rules
                         .requestMatchers(
                                 "/api/auth/**",
+                                "/api/map/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
