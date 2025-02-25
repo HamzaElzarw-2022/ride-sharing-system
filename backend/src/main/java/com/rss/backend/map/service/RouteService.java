@@ -5,13 +5,16 @@ import com.rss.backend.domain.entity.Node;
 import com.rss.backend.map.dto.EdgeDTO;
 import com.rss.backend.map.dto.RouteRequest;
 import com.rss.backend.map.dto.RouteResponse;
+import com.rss.backend.map.dto.simRouteRequest;
 import com.rss.backend.map.model.EdgeProjectionPoint;
-import com.rss.backend.map.model.Route;
+import com.rss.backend.map.model.RouteStep;
 import com.rss.backend.map.repository.EdgeRepository;
+import com.rss.backend.map.repository.NodeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.geo.Point;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -19,12 +22,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RouteService {
     private final EdgeRepository edgeRepository;
+    private final NodeRepository nodeRepository;
 
     public RouteResponse getRoute(RouteRequest request) {
 
         EdgeProjectionPoint startProjection= findClosestEdge(request.getStartPoint());
         EdgeProjectionPoint destinationProjection = findClosestEdge(request.getDestinationPoint());
-        Route route = searchRoute(startProjection, destinationProjection);
+        List<RouteStep> route = searchRoute(startProjection.getEdge().getSpeed(), startProjection.getEdge().getEndNodeId(), destinationProjection);
 
         return RouteResponse.builder()
                 .startPointProjection(startProjection)
@@ -33,9 +37,30 @@ public class RouteService {
                 .build();
     }
 
-    public Route searchRoute(EdgeProjectionPoint startPoint, EdgeProjectionPoint DestinationPoint) {
+    public RouteResponse getSimRoute(simRouteRequest request) {
+
+        EdgeProjectionPoint destinationProjection = findClosestEdge(request.getDestinationPoint());
+        List<RouteStep> route = searchRoute(request.getCurrentSpeed(), request.getNodeDirectedTo(), destinationProjection);
+
+        return RouteResponse.builder()
+                .destinationPointProjection(destinationProjection)
+                .route(route)
+                .build();
+    }
+
+    public List<RouteStep> searchRoute(int currentSpeed, Long nodeId, EdgeProjectionPoint DestinationPoint) {
+
+        List<RouteStep> routeSteps = new ArrayList<>();
+        Node currentNode = nodeRepository.findById(nodeId).orElseThrow();
+        routeSteps.add(RouteStep.builder()
+                .targetX(currentNode.getLatitude())
+                .targetY(currentNode.getLongitude())
+                .speed(currentSpeed)
+                .build());
+
         // TODO: implement algorithm to find shortest route.
-        return new Route();
+
+        return routeSteps;
     }
 
     public EdgeProjectionPoint findClosestEdge(Point point) {

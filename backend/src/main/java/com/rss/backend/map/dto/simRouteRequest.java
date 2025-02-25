@@ -8,8 +8,8 @@ import org.springframework.data.geo.Point;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RouteRequest {
-    // TODO: implement Route Response dto.
-    private Point startPoint;
+public class simRouteRequest {
+    private Integer currentSpeed;
+    private Long nodeDirectedTo;
     private Point destinationPoint;
 }
