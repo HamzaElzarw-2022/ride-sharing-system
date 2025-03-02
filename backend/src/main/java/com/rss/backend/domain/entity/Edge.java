@@ -1,10 +1,7 @@
 package com.rss.backend.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @Builder
@@ -20,10 +17,14 @@ public class Edge {
 
     @ManyToOne
     @JoinColumn(name = "start_node_id", nullable = false)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private Node startNode;
 
     @ManyToOne
     @JoinColumn(name = "end_node_id", nullable = false)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private Node endNode;
 
     private String name;

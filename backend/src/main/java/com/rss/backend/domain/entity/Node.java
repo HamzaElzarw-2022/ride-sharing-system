@@ -1,10 +1,7 @@
 package com.rss.backend.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Set;
 
@@ -25,9 +22,13 @@ public class Node {
     private String name;
 
     @OneToMany(mappedBy = "startNode", cascade = CascadeType.ALL, orphanRemoval = true)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private Set<Edge> OutgoingEdges;
 
     @OneToMany(mappedBy = "endNode", cascade = CascadeType.ALL, orphanRemoval = true)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private Set<Edge> IncomingEdges;
 
 }
