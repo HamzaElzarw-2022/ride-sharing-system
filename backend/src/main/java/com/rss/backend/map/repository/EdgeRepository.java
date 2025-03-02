@@ -17,10 +17,10 @@ public interface EdgeRepository extends JpaRepository<Edge, Long> {
     JOIN nodes n1 ON e.start_node_id = n1.id
     JOIN nodes n2 ON e.end_node_id = n2.id
     WHERE
-        n1.latitude BETWEEN :lat - :range AND :lat + :range
-        AND n1.longitude BETWEEN :lon - :range AND :lon + :range
-        AND n2.latitude BETWEEN :lat - :range AND :lat + :range
-        AND n2.longitude BETWEEN :lon - :range AND :lon + :range
+        (n1.latitude BETWEEN :lat - :range AND :lat + :range
+        AND n1.longitude BETWEEN :lon - :range AND :lon + :range)
+        OR (n2.latitude BETWEEN :lat - :range AND :lat + :range
+        AND n2.longitude BETWEEN :lon - :range AND :lon + :range)
     """, nativeQuery = true)
     List<Edge> findEdgesInBoundingBox(@Param("lat") double lat,
                                       @Param("lon") double lon,

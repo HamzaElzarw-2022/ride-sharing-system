@@ -68,6 +68,7 @@ public class RouteService {
         Node goalNode = null;
 
         // Main A* loop
+        //noinspection ReassignedVariable
         while (!openSet.isEmpty() && goalNode == null) {
             NodeWithScore current = openSet.poll();
 
@@ -131,14 +132,14 @@ public class RouteService {
             Node current = goalNode;
 
             while (cameFrom.containsKey(current.getId())) {
-                pathNodes.add(0, current);
+                pathNodes.addFirst(current);
                 NodeWithParent parent = cameFrom.get(current.getId());
-                pathEdges.add(0, parent.edge);
+                pathEdges.addFirst(parent.edge);
                 current = parent.node;
             }
 
             // Add the start node
-            pathNodes.add(0, startNode);
+            pathNodes.addFirst(startNode);
 
             // Create RouteSteps for each node in the path
             for (int i = 0; i < pathNodes.size(); i++) {
@@ -186,7 +187,7 @@ public class RouteService {
     private double calculateHeuristic(Node node, Point targetPoint) {
         return calculateDistance(
                 node.getLongitude(), node.getLatitude(),
-                (double) targetPoint.getY(), (double) targetPoint.getX()
+                targetPoint.getY(), targetPoint.getX()
         );
     }
 
@@ -207,18 +208,32 @@ public class RouteService {
             searchRadius *= 2;
         } while (candidateEdges.isEmpty() && searchRadius < 2000);
 
-        if(candidateEdges.isEmpty())
+        if (candidateEdges.isEmpty()) {
             return null; // TODO: throw exception
+        }
 
-        System.out.println("NUMBER OF CANDIDATES: " + candidateEdges.size() + " SEARCH RADIUS: " + searchRadius);
+        System.out.println("NUMBER OF CANDIDATES: " + candidateEdges.size() + " SEARCH RADIUS: " + searchRadius/2);
 
-        Edge closestEdge = candidateEdges.stream()
-                .min(Comparator.comparing(edge ->
-                        pointToEdgeDistance(point, edge.getStartNode(), edge.getEndNode())
-                ))
-                .orElseThrow();
+        EdgeProjectionPoint closestProjection = null;
+        double minDistance = Double.MAX_VALUE;
 
-        return getProjectionPoint(point, closestEdge);
+        for (Edge edge : candidateEdges) {
+            // Calculate projection point for this edge
+            EdgeProjectionPoint projection = getProjectionPoint(point, edge);
+
+            // Calculate actual distance from original point to projection point
+            double distance = Math.sqrt(
+                    Math.pow(projection.getProjectionPoint().getX() - point.getX(), 2) +
+                            Math.pow(projection.getProjectionPoint().getY() - point.getY(), 2)
+            );
+
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestProjection = projection;
+            }
+        }
+
+        return closestProjection;
     }
 
     public EdgeProjectionPoint getProjectionPoint(Point point, Edge edge) {
@@ -245,16 +260,6 @@ public class RouteService {
                 .edge(EdgeDTO.toEdgeDTO(edge))
                 .distanceFromStart(distanceFromStart)
                 .build();
-    }
-
-    public double pointToEdgeDistance(Point point, Node start, Node end) {
-        double x1 = start.getLatitude(), y1 = start.getLongitude();
-        double x2 = end.getLatitude(), y2 = end.getLongitude();
-
-        double numerator = Math.abs((x2 - x1) * (y1 - point.getY()) - (x1 - point.getX()) * (y2 - y1));
-        double denominator = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-
-        return numerator / denominator;
     }
 
     // Helper classes for A* algorithm
