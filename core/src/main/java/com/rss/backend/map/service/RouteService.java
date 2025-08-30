@@ -46,7 +46,7 @@ public class RouteService {
                 .build();
     }
 
-    public List<RouteStep> searchRoute(int currentSpeed, Long nodeId, EdgeProjectionPoint destinationPoint) {
+    private List<RouteStep> searchRoute(int currentSpeed, Long nodeId, EdgeProjectionPoint destinationPoint) {
         List<RouteStep> routeSteps = new ArrayList<>();
 
         // Retrieve start node and target edge, nodes, and coordinate
