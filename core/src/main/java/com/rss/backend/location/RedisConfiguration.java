@@ -10,7 +10,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 
 @Configuration
 @RequiredArgsConstructor
-class RedisConfiguration {
+public class RedisConfiguration {
 
     @Bean
     public RedisConnectionFactory jedisConnectionFactory() {

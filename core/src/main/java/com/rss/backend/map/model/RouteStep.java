@@ -3,7 +3,6 @@ package com.rss.backend.map.model;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.data.geo.Point;
 
 @Data
 @Builder
