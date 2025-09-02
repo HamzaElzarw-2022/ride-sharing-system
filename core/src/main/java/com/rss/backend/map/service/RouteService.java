@@ -1,7 +1,7 @@
 package com.rss.backend.map.service;
 
-import com.rss.backend.domain.entity.Edge;
-import com.rss.backend.domain.entity.Node;
+import com.rss.backend.map.entity.Edge;
+import com.rss.backend.map.entity.Node;
 import com.rss.backend.map.dto.EdgeDTO;
 import com.rss.backend.map.dto.RouteRequest;
 import com.rss.backend.map.dto.RouteResponse;

@@ -1,6 +1,6 @@
 package com.rss.backend.map.dto;
 
-import com.rss.backend.domain.entity.Edge;
+import com.rss.backend.map.entity.Edge;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

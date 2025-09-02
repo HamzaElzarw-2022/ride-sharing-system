@@ -1,8 +1,8 @@
 package com.rss.backend.map.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.rss.backend.domain.entity.Edge;
-import com.rss.backend.domain.entity.Node;
+import com.rss.backend.map.entity.Edge;
+import com.rss.backend.map.entity.Node;
 import com.rss.backend.map.repository.EdgeRepository;
 import com.rss.backend.map.repository.NodeRepository;
 import lombok.RequiredArgsConstructor;

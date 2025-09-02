@@ -1,4 +1,4 @@
-package com.rss.backend.location;
+package com.rss.backend.common.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

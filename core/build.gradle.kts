@@ -3,6 +3,7 @@ plugins {
     id("org.springframework.boot") version "3.4.2"
     id("io.spring.dependency-management") version "1.1.7"
 }
+val springModulithVersion by extra("1.3.7")
 
 group = "com.rss"
 version = "0.0.1-SNAPSHOT"
@@ -28,6 +29,10 @@ dependencies {
 
     // Lombok
     implementation("org.projectlombok:lombok")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.modulith:spring-modulith-starter-core")
+    implementation("org.springframework.modulith:spring-modulith-starter-jpa")
+    testImplementation("org.springframework.modulith:spring-modulith-starter-test")
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 
@@ -45,6 +50,11 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     "developmentOnly"("org.springframework.boot:spring-boot-devtools")
+}
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.modulith:spring-modulith-bom:$springModulithVersion")
+    }
 }
 
 tasks.withType<Test> {

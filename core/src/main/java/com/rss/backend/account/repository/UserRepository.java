@@ -1,6 +1,6 @@
 package com.rss.backend.account.repository;
 
-import com.rss.backend.domain.entity.User;
+import com.rss.backend.account.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
