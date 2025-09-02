@@ -1,6 +1,6 @@
 package com.rss.backend.account.dto;
 
-import com.rss.backend.domain.Role;
+import com.rss.backend.account.entity.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

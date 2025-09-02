@@ -1,6 +1,5 @@
-package com.rss.backend.domain.entity;
+package com.rss.backend.account.entity;
 
-import com.rss.backend.domain.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

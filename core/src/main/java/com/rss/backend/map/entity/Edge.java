@@ -1,4 +1,4 @@
-package com.rss.backend.domain.entity;
+package com.rss.backend.map.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

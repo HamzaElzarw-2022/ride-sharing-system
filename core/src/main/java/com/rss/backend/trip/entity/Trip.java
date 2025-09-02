@@ -1,4 +1,4 @@
-package com.rss.backend.domain.entity;
+package com.rss.backend.trip.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -21,21 +21,26 @@ public class Trip {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "driver_id", nullable = false)
-    private Driver driver;
-    @ManyToOne
-    @JoinColumn(name = "rider_id", nullable = false)
-    private Rider rider;
+    @Column(name = "status", nullable = false)
+    private TripStatus status;
+
+    @Column(name = "rider_id", nullable = false)
+    private Long riderId;
+
+    @Column(name = "start_point", nullable = false)
+    private Point startPoint;
+
+    @Column(name = "end_point", nullable = false)
+    private Point endPoint;
+
+    private Long driverId;
 
     private Timestamp startTime;
     private Timestamp endTime;
-    private TripStatus status;
 
-    private Point startPoint;
-    private Point endPoint;
+    private Double fare;
 
     public enum TripStatus {
-        PICKING_UP, STARTED, COMPLETED, CANCELLED
+        MATCHING, PICKING_UP, STARTED, COMPLETED, CANCELLED
     }
 }

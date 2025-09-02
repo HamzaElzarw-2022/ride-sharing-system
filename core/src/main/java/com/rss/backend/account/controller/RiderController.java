@@ -1,6 +1,6 @@
 package com.rss.backend.account.controller;
 
-import com.rss.backend.domain.entity.User;
+import com.rss.backend.account.entity.User;
 import com.rss.backend.account.repository.UserRepository;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
