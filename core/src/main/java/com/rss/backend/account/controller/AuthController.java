@@ -5,12 +5,14 @@ import com.rss.backend.account.dto.AuthResponse;
 import com.rss.backend.account.dto.RegisterDriverRequest;
 import com.rss.backend.account.dto.RegisterRiderRequest;
 import com.rss.backend.account.service.AuthService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
+@SecurityRequirements()
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
