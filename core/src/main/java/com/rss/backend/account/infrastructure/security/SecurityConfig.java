@@ -1,4 +1,4 @@
-package com.rss.backend.account.config;
+package com.rss.backend.account.infrastructure.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

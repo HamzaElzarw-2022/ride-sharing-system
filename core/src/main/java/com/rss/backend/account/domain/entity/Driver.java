@@ -1,4 +1,4 @@
-package com.rss.backend.account.entity;
+package com.rss.backend.account.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -11,12 +11,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "riders")
-public class Rider {
+@Table(name = "drivers")
+public class Driver {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Integer debt;
+
+    private String licenseNumber;
+    private String vehicleDetails;
+    private Integer credit;
+    private Integer rating;
+    private Integer rateCount;
 
     @OneToOne
     @JoinColumn(name = "user_id")

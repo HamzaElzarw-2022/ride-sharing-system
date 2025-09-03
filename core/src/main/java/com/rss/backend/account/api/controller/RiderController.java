@@ -1,7 +1,7 @@
-package com.rss.backend.account.controller;
+package com.rss.backend.account.api.controller;
 
-import com.rss.backend.account.entity.User;
-import com.rss.backend.account.repository.UserRepository;
+import com.rss.backend.account.domain.entity.User;
+import com.rss.backend.account.domain.repository.UserRepository;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,24 +9,17 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.stream.Stream;
-
 @RestController
-@RequestMapping("/api/driver")
+@RequestMapping("/api/rider")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "Bearer Authentication")
-public class DriverController {
+public class RiderController {
     private final UserRepository userRepository;
 
     @GetMapping("/details/{userId}")
-    public String getDriverDetails(@PathVariable Long userId) {
+    public String getRiderDetails(@PathVariable Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        return "Driver: " + user.getUsername() + ", License: " + user.getDriver().getLicenseNumber();
-    }
-
-    @GetMapping("/allDetails/")
-    public Stream<String> getAllDriverDetails() {
-        return userRepository.findAll().stream().map(user -> "Driver: " + user.getUsername() + ", License: " + user.getDriver().getLicenseNumber());
+        return "Rider: " + user.getUsername() + ", Payment Method: " + user.getRider().getDebt();
     }
 }

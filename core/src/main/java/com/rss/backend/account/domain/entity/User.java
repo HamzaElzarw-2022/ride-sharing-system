@@ -1,4 +1,4 @@
-package com.rss.backend.account.entity;
+package com.rss.backend.account.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

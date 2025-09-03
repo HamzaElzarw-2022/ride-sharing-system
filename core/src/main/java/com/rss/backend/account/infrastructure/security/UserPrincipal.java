@@ -1,6 +1,6 @@
-package com.rss.backend.account.config;
+package com.rss.backend.account.infrastructure.security;
 
-import com.rss.backend.account.entity.User;
+import com.rss.backend.account.domain.entity.User;
 import java.util.Collection;
 import java.util.List;
 import lombok.Data;

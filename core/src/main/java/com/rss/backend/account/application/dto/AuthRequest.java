@@ -1,6 +1,5 @@
-package com.rss.backend.account.dto;
+package com.rss.backend.account.application.dto;
 
-import com.rss.backend.account.entity.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,11 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegisterRiderRequest {
-    private String username;
+public class AuthRequest {
     private String email;
     private String password;
-    private Role role;
-
-    private String preferredPaymentMethod;
 }

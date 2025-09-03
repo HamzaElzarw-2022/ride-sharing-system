@@ -1,10 +1,10 @@
-package com.rss.backend.account.controller;
+package com.rss.backend.account.api.controller;
 
-import com.rss.backend.account.dto.AuthRequest;
-import com.rss.backend.account.dto.AuthResponse;
-import com.rss.backend.account.dto.RegisterDriverRequest;
-import com.rss.backend.account.dto.RegisterRiderRequest;
-import com.rss.backend.account.service.AuthService;
+import com.rss.backend.account.application.dto.AuthRequest;
+import com.rss.backend.account.application.dto.AuthResponse;
+import com.rss.backend.account.application.dto.RegisterDriverRequest;
+import com.rss.backend.account.application.dto.RegisterRiderRequest;
+import com.rss.backend.account.application.service.AuthService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

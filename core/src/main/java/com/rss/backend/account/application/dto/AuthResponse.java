@@ -1,4 +1,4 @@
-package com.rss.backend.account.dto;
+package com.rss.backend.account.application.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,16 +1,17 @@
-package com.rss.backend.account.service;
+package com.rss.backend.account.application.service;
 
-import com.rss.backend.account.dto.AuthRequest;
-import com.rss.backend.account.dto.AuthResponse;
-import com.rss.backend.account.dto.RegisterDriverRequest;
-import com.rss.backend.account.dto.RegisterRiderRequest;
-import com.rss.backend.account.entity.Role;
-import com.rss.backend.account.repository.DriverRepository;
-import com.rss.backend.account.repository.RiderRepository;
-import com.rss.backend.account.repository.UserRepository;
-import com.rss.backend.account.entity.Driver;
-import com.rss.backend.account.entity.Rider;
-import com.rss.backend.account.entity.User;
+import com.rss.backend.account.application.dto.AuthRequest;
+import com.rss.backend.account.application.dto.AuthResponse;
+import com.rss.backend.account.application.dto.RegisterDriverRequest;
+import com.rss.backend.account.application.dto.RegisterRiderRequest;
+import com.rss.backend.account.application.port.out.JwtService;
+import com.rss.backend.account.domain.entity.Role;
+import com.rss.backend.account.domain.repository.DriverRepository;
+import com.rss.backend.account.domain.repository.RiderRepository;
+import com.rss.backend.account.domain.repository.UserRepository;
+import com.rss.backend.account.domain.entity.Driver;
+import com.rss.backend.account.domain.entity.Rider;
+import com.rss.backend.account.domain.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -47,7 +48,7 @@ public class AuthService {
         riderRepository.save(rider);
 
         // Generate JWT
-        var jwtToken = jwtService.generateToken(user);
+        var jwtToken = jwtService.generateToken(user.getEmail());
         return AuthResponse.builder()
                 .token(jwtToken)
                 .build();
@@ -75,7 +76,7 @@ public class AuthService {
         driverRepository.save(driver);
 
         // Generate JWT
-        var jwtToken = jwtService.generateToken(user);
+        var jwtToken = jwtService.generateToken(user.getEmail());
         return AuthResponse.builder()
                 .token(jwtToken)
                 .build();
@@ -90,7 +91,7 @@ public class AuthService {
         );
         var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow();
-        var jwtToken = jwtService.generateToken(user);
+        var jwtToken = jwtService.generateToken(user.getEmail());
         return AuthResponse.builder()
                 .token(jwtToken)
                 .build();

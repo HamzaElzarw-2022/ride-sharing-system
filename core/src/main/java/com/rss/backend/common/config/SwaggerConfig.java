@@ -1,4 +1,4 @@
-package com.rss.backend.account.config;
+package com.rss.backend.common.config;
 
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;

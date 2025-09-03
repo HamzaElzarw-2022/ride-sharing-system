@@ -1,5 +1,6 @@
-package com.rss.backend.account.dto;
+package com.rss.backend.account.application.dto;
 
+import com.rss.backend.account.domain.entity.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,11 +10,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegisterDriverRequest {
+public class RegisterRiderRequest {
     private String username;
     private String email;
     private String password;
+    private Role role;
 
-    private String licenseNumber;
-    private String vehicleDetails;
+    private String preferredPaymentMethod;
 }

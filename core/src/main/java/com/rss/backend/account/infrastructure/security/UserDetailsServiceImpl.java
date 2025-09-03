@@ -1,8 +1,7 @@
-package com.rss.backend.account.service;
+package com.rss.backend.account.infrastructure.security;
 
-import com.rss.backend.account.config.UserPrincipal;
-import com.rss.backend.account.entity.User;
-import com.rss.backend.account.repository.UserRepository;
+import com.rss.backend.account.domain.entity.User;
+import com.rss.backend.account.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
