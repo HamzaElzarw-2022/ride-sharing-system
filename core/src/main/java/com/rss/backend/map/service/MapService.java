@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,10 +28,17 @@ public class MapService {
     private final MapMetadataRepository metadataRepository;
     private final ObjectMapper objectMapper;
 
-    private static final String DEFAULT_MAP_PATH = "map.json";
-    private static final Integer DEFAULT_LONGITUDE = 500;
-    private static final Integer DEFAULT_LATITUDE = 500;
-    private static final Integer DEFAULT_EDGE_SPEED = 50;
+    @Value("${map.path}")
+    private String DEFAULT_MAP_PATH;
+
+    @Value("${map.longitude}")
+    private Integer DEFAULT_LONGITUDE;
+
+    @Value("${map.latitude}")
+    private Integer DEFAULT_LATITUDE;
+
+    @Value("${map.edge.speed}")
+    private Integer DEFAULT_EDGE_SPEED;
 
     @PostConstruct
     public void loadMapOnStartup() {
