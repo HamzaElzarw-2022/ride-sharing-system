@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class MapMetadata {
     @Id
-    @Column(name = "key", nullable = false)
+    @Column(name = "metadata_key", nullable = false)
     private String key;
 
     @Column(name = "version", nullable = false)

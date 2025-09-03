@@ -1,7 +1,5 @@
 {
-  "version": "1",
-  "longitude": 100,
-  "latitude": 200,
+  "version": "2",
   "nodes": [
     {
       "id": 1,
