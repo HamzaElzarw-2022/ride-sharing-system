@@ -1,0 +1,201 @@
+{
+  "version": "2",
+  "nodes": [
+    {
+      "id": 1,
+      "name": "intersection1",
+      "x": 50,
+      "y": -50
+    },
+    {
+      "id": 2,
+      "name": "intersection2",
+      "x": 50,
+      "y": 100
+    },
+    {
+      "id": 3,
+      "name": "intersection3",
+      "x": -50,
+      "y": 100
+    },
+    {
+      "id": 4,
+      "name": "intersection4",
+      "x": 100,
+      "y": 50
+    },
+    {
+      "id": 10,
+      "name": "intersection_10",
+      "x": -150,
+      "y": 100
+    },
+    {
+      "id": 11,
+      "name": "intersection_11",
+      "x": -250,
+      "y": 100
+    },
+    {
+      "id": 12,
+      "name": "intersection_12",
+      "x": -350,
+      "y": 100
+    },
+    {
+      "id": 13,
+      "name": "intersection_13",
+      "x": -350,
+      "y": -100
+    },
+    {
+      "id": 14,
+      "name": "intersection_14",
+      "x": -300,
+      "y": -50
+    },
+    {
+      "id": 15,
+      "name": "intersection_15",
+      "x": -200,
+      "y": -50
+    },
+    {
+      "id": 16,
+      "name": "intersection_16",
+      "x": -50,
+      "y": -50
+    },
+    {
+      "id": 17,
+      "name": "intersection_17",
+      "x": 100,
+      "y": -100
+    },
+    {
+      "id": 18,
+      "name": "intersection_18",
+      "x": 100,
+      "y": -50
+    }
+  ],
+  "edges": [
+    {
+      "id": 1,
+      "name": "millet",
+      "startId": 1,
+      "endId": 2
+    },
+    {
+      "id": 2,
+      "name": "street",
+      "startId": 2,
+      "endId": 3
+    },
+    {
+      "id": 3,
+      "name": "Cadde 4",
+      "startId": 2,
+      "endId": 4
+    },
+    {
+      "id": 10,
+      "name": "connection_10",
+      "startId": 3,
+      "endId": 10,
+      "speed": 50
+    },
+    {
+      "id": 11,
+      "name": "connection_11",
+      "startId": 10,
+      "endId": 11,
+      "speed": 50
+    },
+    {
+      "id": 12,
+      "name": "connection_12",
+      "startId": 11,
+      "endId": 12,
+      "speed": 50
+    },
+    {
+      "id": 13,
+      "name": "connection_13",
+      "startId": 12,
+      "endId": 13,
+      "speed": 50
+    },
+    {
+      "id": 14,
+      "name": "connection_14",
+      "startId": 13,
+      "endId": 14,
+      "speed": 50
+    },
+    {
+      "id": 15,
+      "name": "connection_15",
+      "startId": 14,
+      "endId": 15,
+      "speed": 50
+    },
+    {
+      "id": 16,
+      "name": "connection_16",
+      "startId": 15,
+      "endId": 16,
+      "speed": 50
+    },
+    {
+      "id": 17,
+      "name": "connection_17",
+      "startId": 16,
+      "endId": 1,
+      "speed": 50
+    },
+    {
+      "id": 18,
+      "name": "connection_18",
+      "startId": 14,
+      "endId": 11,
+      "speed": 50
+    },
+    {
+      "id": 19,
+      "name": "connection_19",
+      "startId": 15,
+      "endId": 10,
+      "speed": 50
+    },
+    {
+      "id": 20,
+      "name": "connection_20",
+      "startId": 16,
+      "endId": 3,
+      "speed": 50
+    },
+    {
+      "id": 21,
+      "name": "connection_21",
+      "startId": 13,
+      "endId": 17,
+      "speed": "90"
+    },
+    {
+      "id": 22,
+      "name": "connection_22",
+      "startId": 17,
+      "endId": 18,
+      "speed": 50
+    },
+    {
+      "id": 23,
+      "name": "connection_23",
+      "startId": 18,
+      "endId": 4,
+      "speed": 50
+    }
+  ]
+}
