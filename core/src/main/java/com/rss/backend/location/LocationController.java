@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.geo.Point;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,14 +28,14 @@ public class LocationController {
 
     @GetMapping("/{id}/location")
     public ResponseEntity<?> getDriverLocationInternal(@PathVariable Long id) {
-        double[] location = locationService.getDriverLocation(id);
+        Point location = locationService.getDriverLocation(id);
         if (location == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Driver location not found");
         }
         Map<String, Object> body = new HashMap<>();
         body.put("id", id);
-        body.put("x", location[0]);
-        body.put("y", location[1]);
+        body.put("x", location.getX());
+        body.put("y", location.getY());
         return ResponseEntity.ok(body);
     }
 

@@ -53,14 +53,14 @@ public class GeoCoordinateMapper {
     /**
      * Inverse: convert Redis GEO point back to internal map coordinates (x,y)
      */
-    public double[] fromRedisPoint(Point p) {
+    public Point fromRedisPoint(Point p) {
         double dxMeters = (p.getX() - centerLon) / DEG_PER_METER_LON; // meters in longitudinal direction
         double dyMeters = (p.getY() - centerLat) / DEG_PER_METER_LAT; // meters in latitudinal direction
         double x = (dxMeters / metersPerUnit) + (maxX / 2.0);
         double y = (dyMeters / metersPerUnit) + (maxY / 2.0);
         x = clamp(x, 0, maxX);
         y = clamp(y, 0, maxY);
-        return new double[]{x, y};
+        return new Point(x, y);
     }
 
     /**

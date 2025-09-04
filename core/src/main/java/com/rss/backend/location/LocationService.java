@@ -41,7 +41,7 @@ public class LocationService implements LocationInternalApi {
     /**
      * Retrieve driver location in map unit; returns null if absent.
      */
-    public double[] getDriverLocation(Long driverId) {
+    public Point getDriverLocation(Long driverId) {
         Point p = getDriverLocationRaw(driverId);
         if (p == null) return null;
         return geoCoordinateMapper.fromRedisPoint(p);

@@ -1,5 +1,7 @@
 package com.rss.backend.trip.application.port.in;
 
+import com.rss.backend.trip.application.dto.TripDto;
+import java.util.List;
 import org.springframework.data.geo.Point;
 
 public interface TripService {
@@ -11,7 +13,7 @@ public interface TripService {
     * notes:
     * validate user is not in a trip.
     * */
-    void createTrip(Long userId, Point startNodeId, Point endNodeId);
+    TripDto createTrip(Long userId, Point startNodeId, Point endNodeId);
 
     /*
     * driver accepts the trip, trip status is marked as PICKING_UP,
@@ -22,13 +24,13 @@ public interface TripService {
     * validate trip is in MATCHING status.
     * validate driver was requested for the trip.
     * */
-    void acceptTrip(Long driverId, Long tripId);
+    TripDto acceptTrip(Long driverId, Long tripId);
 
     /*
     * driver starts the trip after arriving to user location, trip status is marked as STARTED,
     * service should validate that driver is at user location.
     * */
-    void startTrip(Long driverId, Long tripId);
+    TripDto startTrip(Long driverId, Long tripId);
 
     /*
     * driver ends the trip after arriving to destination, trip status is marked as COMPLETED,
@@ -37,6 +39,6 @@ public interface TripService {
     * */
     void endTrip(Long driverId, Long tripId);
 
-    void getTripStatus(Long tripId);
-    void getTripHistory(Long riderId);
+    TripDto getTrip(Long tripId);
+    List<TripDto> getTripHistory(Long riderId);
 }
