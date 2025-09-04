@@ -21,13 +21,13 @@ public class LocationController {
             @RequestParam("x") Double x,
             @RequestParam("y") Double y,
             @NotNull @CurrentDriverId Long id) {
-        locationService.updateDriverLocationInternal(id, x, y);
+        locationService.updateDriverLocation(id, x, y);
         return ResponseEntity.ok("driver location updated.");
     }
 
     @GetMapping("/{id}/location")
     public ResponseEntity<?> getDriverLocationInternal(@PathVariable Long id) {
-        double[] location = locationService.getDriverLocationInternal(id);
+        double[] location = locationService.getDriverLocation(id);
         if (location == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Driver location not found");
         }
@@ -43,7 +43,7 @@ public class LocationController {
             @RequestParam("x") double x,
             @RequestParam("y") double y,
             @RequestParam("radius") double radiusUnits) {
-        Set<Long> drivers = locationService.findDriversWithinRadiusInternal(x, y, radiusUnits);
+        Set<Long> drivers = locationService.findDriversWithinRadius(x, y, radiusUnits);
         Map<String, Object> body = new HashMap<>();
         body.put("centerX", x);
         body.put("centerY", y);
