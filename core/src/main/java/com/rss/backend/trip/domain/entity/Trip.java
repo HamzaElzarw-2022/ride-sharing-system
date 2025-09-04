@@ -1,13 +1,12 @@
 package com.rss.backend.trip.domain.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.geo.Point;
-
-import java.security.Timestamp;
 
 @Data
 @Builder
@@ -35,8 +34,11 @@ public class Trip {
 
     private Long driverId;
 
-    private Timestamp startTime;
-    private Timestamp endTime;
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
 
     private Double fare;
 
