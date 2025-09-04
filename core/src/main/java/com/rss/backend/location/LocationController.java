@@ -1,5 +1,7 @@
 package com.rss.backend.location;
 
+import com.rss.backend.common.annotation.CurrentDriverId;
+import jakarta.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -9,29 +11,30 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/drivers/location")
+@RequestMapping("/api/drivers")
 @RequiredArgsConstructor
 public class LocationController {
     private final LocationService locationService;
 
-    @PostMapping(value = "/update")
-    public ResponseEntity<String> getRoute(
+    @PostMapping(value = "/location/update")
+    public ResponseEntity<String> updateDriverLocation(
             @RequestParam("x") Double x,
-            @RequestParam("y") Double y) {
-        locationService.updateDriverLocationInternal(x, y);
+            @RequestParam("y") Double y,
+            @NotNull @CurrentDriverId Long id) {
+        locationService.updateDriverLocationInternal(id, x, y);
         return ResponseEntity.ok("driver location updated.");
     }
 
-    @GetMapping
-    public ResponseEntity<?> getDriverLocationInternal(@RequestParam("username") String username) {
-        double[] coords = locationService.getDriverLocationInternal(username);
-        if (coords == null) {
+    @GetMapping("/{id}/location")
+    public ResponseEntity<?> getDriverLocationInternal(@PathVariable Long id) {
+        double[] location = locationService.getDriverLocationInternal(id);
+        if (location == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Driver location not found");
         }
         Map<String, Object> body = new HashMap<>();
-        body.put("username", username);
-        body.put("x", coords[0]);
-        body.put("y", coords[1]);
+        body.put("id", id);
+        body.put("x", location[0]);
+        body.put("y", location[1]);
         return ResponseEntity.ok(body);
     }
 
@@ -40,7 +43,7 @@ public class LocationController {
             @RequestParam("x") double x,
             @RequestParam("y") double y,
             @RequestParam("radius") double radiusUnits) {
-        Set<String> drivers = locationService.findDriversWithinRadiusInternal(x, y, radiusUnits);
+        Set<Long> drivers = locationService.findDriversWithinRadiusInternal(x, y, radiusUnits);
         Map<String, Object> body = new HashMap<>();
         body.put("centerX", x);
         body.put("centerY", y);

@@ -6,8 +6,6 @@ import org.springframework.data.geo.Point;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.domain.geo.GeoReference;
 import org.springframework.data.redis.domain.geo.Metrics;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,26 +27,24 @@ public class LocationService {
     /**
      * Store driver position using internal normalized map coordinates (x,y)
      */
-    public void updateDriverLocationInternal(double x, double y) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
+    public void updateDriverLocationInternal(Long driverId, double x, double y) {
         Point redisPoint = geoCoordinateMapper.toRedisPoint(x, y);
-        stringRedisTemplate.opsForGeo().add(KEY_DRIVERS, redisPoint, username);
+        stringRedisTemplate.opsForGeo().add(KEY_DRIVERS, redisPoint, driverId.toString());
     }
 
     /**
      * Retrieve driver location as raw Redis GEO point (lon,lat)
      */
-    private Point getDriverLocation(String username) {
-        List<Point> pts = stringRedisTemplate.opsForGeo().position(KEY_DRIVERS, username);
+    private Point getDriverLocation(Long driverId) {
+        List<Point> pts = stringRedisTemplate.opsForGeo().position(KEY_DRIVERS, driverId.toString());
         return (pts == null || pts.isEmpty()) ? null : pts.getFirst();
     }
 
     /**
      * Retrieve driver location mapped back to internal normalized coordinates; returns null if absent.
      */
-    public double[] getDriverLocationInternal(String username) {
-        Point p = getDriverLocation(username);
+    public double[] getDriverLocationInternal(Long driverId) {
+        Point p = getDriverLocation(driverId);
         if (p == null) return null;
         return geoCoordinateMapper.fromRedisPoint(p);
     }
@@ -61,7 +57,7 @@ public class LocationService {
      * @return set of driver usernames within the radius (excluding none)
      * Validation: radiusUnits must be positive and not NaN/Infinite; otherwise empty set is returned.
      */
-    public Set<String> findDriversWithinRadiusInternal(double x, double y, double radiusUnits) {
+    public Set<Long> findDriversWithinRadiusInternal(double x, double y, double radiusUnits) {
         if (radiusUnits <= 0 || Double.isNaN(radiusUnits) || Double.isInfinite(radiusUnits)) {
             return Set.of();
         }
@@ -77,7 +73,7 @@ public class LocationService {
 
         if (results == null || results.getContent().isEmpty()) return Set.of();
         return results.getContent().stream()
-                .map(r -> r.getContent().getName())
+                .map(r -> Long.valueOf(r.getContent().getName()))
                 .collect(Collectors.toSet());
     }
 }
