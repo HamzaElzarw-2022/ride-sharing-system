@@ -1,7 +1,6 @@
 package com.rss.backend.location;
 
 import com.rss.backend.common.annotation.CurrentDriverId;
-import jakarta.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -21,7 +20,7 @@ public class LocationController {
     public ResponseEntity<String> updateDriverLocation(
             @RequestParam("x") Double x,
             @RequestParam("y") Double y,
-            @NotNull @CurrentDriverId Long id) {
+            @CurrentDriverId Long id) {
         locationService.updateDriverLocation(id, x, y);
         return ResponseEntity.ok("driver location updated.");
     }
