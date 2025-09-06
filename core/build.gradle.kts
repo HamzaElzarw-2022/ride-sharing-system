@@ -27,12 +27,13 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("redis.clients:jedis")
 
-    // Lombok
-    implementation("org.projectlombok:lombok")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.modulith:spring-modulith-starter-core")
     implementation("org.springframework.modulith:spring-modulith-starter-jpa")
-    testImplementation("org.springframework.modulith:spring-modulith-starter-test")
+    implementation("org.springframework.boot:spring-boot-starter-amqp")
+
+    // Lombok
+    implementation("org.projectlombok:lombok")
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 
@@ -48,6 +49,8 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.springframework.modulith:spring-modulith-starter-test")
+    testImplementation("org.springframework.amqp:spring-rabbit-test")
 
     "developmentOnly"("org.springframework.boot:spring-boot-devtools")
 }

@@ -1,5 +1,6 @@
 package com.rss.backend.map.service;
 
+import com.rss.backend.map.MapInternalApi;
 import com.rss.backend.map.entity.Edge;
 import com.rss.backend.map.entity.Node;
 import com.rss.backend.map.dto.EdgeDTO;
@@ -18,7 +19,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class RouteService {
+public class RouteService implements MapInternalApi {
     private final EdgeRepository edgeRepository;
     private final NodeRepository nodeRepository;
 
@@ -106,8 +107,8 @@ public class RouteService {
 
                 // Calculate new g-score
                 double edgeDistance = calculateDistance(
-                        current.node.getLongitude(), current.node.getLatitude(),
-                        neighbor.getLongitude(), neighbor.getLatitude()
+                        current.node.getLatitude(), current.node.getLongitude(),
+                        neighbor.getLatitude(), neighbor.getLongitude()
                 );
 
                 double tentativeGScore = gScore.get(current.node.getId()) + edgeDistance;
@@ -186,18 +187,23 @@ public class RouteService {
 
     private double calculateHeuristic(Node node, Point targetPoint) {
         return calculateDistance(
-                node.getLongitude(), node.getLatitude(),
-                targetPoint.getY(), targetPoint.getX()
+                node.getLatitude(), node.getLongitude(),
+                targetPoint.getX(), targetPoint.getY()
         );
     }
 
-    private double calculateDistance(Long longitude1, Long latitude1, double longitude2, double latitude2) {
+    private double calculateDistance(double x1, double y1, double x2, double y2) {
         return Math.sqrt(
-                Math.pow(longitude2 - longitude1, 2) +
-                        Math.pow(latitude2 - latitude1, 2)
+                Math.pow(y2 - y1, 2) +
+                        Math.pow(x2 - x1, 2)
         );
     }
 
+    private double calculateDistance(Point p1, Point p2) {
+        return calculateDistance(p1.getX(), p1.getY(), p2.getX(), p2.getY());
+    }
+
+    @Override
     public EdgeProjectionPoint findClosestEdge(Point point) {
 
         List<Edge> candidateEdges;
@@ -234,6 +240,24 @@ public class RouteService {
         }
 
         return closestProjection;
+    }
+
+    @Override
+    public boolean isAtExpectedOrProjection(Point actual, Point expected) {
+        final double TOLERANCE = 10.0;
+
+        // Check if actual point close to expected point?
+        double directDistance = calculateDistance(actual, expected);
+        if (directDistance <= TOLERANCE) return true;
+
+        EdgeProjectionPoint projectionPoint = findClosestEdge(expected);
+        if (projectionPoint == null) return false;
+
+        // Calculate distance between actual point and projection point
+        Point projection = projectionPoint.getProjectionPoint();
+        double projectionDistance = calculateDistance(actual, projection);
+
+        return projectionDistance <= TOLERANCE;
     }
 
     public EdgeProjectionPoint getProjectionPoint(Point point, Edge edge) {

@@ -3,12 +3,7 @@ package com.rss.backend.location;
 import java.util.Set;
 import org.springframework.data.geo.Point;
 
-public interface LocationService {
-
-    /**
-     * Store driver position in map unit coordinates (x,y)
-     */
-    void updateDriverLocation(Long driverId, double x, double y);
+public interface LocationInternalApi {
 
     /**
      * Retrieve driver location in map unit; returns null if absent.

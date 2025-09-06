@@ -1,11 +1,11 @@
 package com.rss.backend.location;
 
 import com.rss.backend.common.annotation.CurrentDriverId;
-import jakarta.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.geo.Point;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,21 +20,21 @@ public class LocationController {
     public ResponseEntity<String> updateDriverLocation(
             @RequestParam("x") Double x,
             @RequestParam("y") Double y,
-            @NotNull @CurrentDriverId Long id) {
-        locationService.updateDriverLocationInternal(id, x, y);
+            @CurrentDriverId Long id) {
+        locationService.updateDriverLocation(id, x, y);
         return ResponseEntity.ok("driver location updated.");
     }
 
     @GetMapping("/{id}/location")
     public ResponseEntity<?> getDriverLocationInternal(@PathVariable Long id) {
-        double[] location = locationService.getDriverLocationInternal(id);
+        Point location = locationService.getDriverLocation(id);
         if (location == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Driver location not found");
         }
         Map<String, Object> body = new HashMap<>();
         body.put("id", id);
-        body.put("x", location[0]);
-        body.put("y", location[1]);
+        body.put("x", location.getX());
+        body.put("y", location.getY());
         return ResponseEntity.ok(body);
     }
 
@@ -43,7 +43,7 @@ public class LocationController {
             @RequestParam("x") double x,
             @RequestParam("y") double y,
             @RequestParam("radius") double radiusUnits) {
-        Set<Long> drivers = locationService.findDriversWithinRadiusInternal(x, y, radiusUnits);
+        Set<Long> drivers = locationService.findDriversWithinRadius(x, y, radiusUnits);
         Map<String, Object> body = new HashMap<>();
         body.put("centerX", x);
         body.put("centerY", y);
