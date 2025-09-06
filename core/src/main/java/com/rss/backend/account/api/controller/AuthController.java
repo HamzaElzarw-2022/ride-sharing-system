@@ -6,6 +6,7 @@ import com.rss.backend.account.application.dto.RegisterDriverRequest;
 import com.rss.backend.account.application.dto.RegisterRiderRequest;
 import com.rss.backend.account.application.service.AuthService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,17 +19,17 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register/rider")
-    public ResponseEntity<AuthResponse> registerRider(@RequestBody RegisterRiderRequest request) {
+    public ResponseEntity<AuthResponse> registerRider(@RequestBody @Valid RegisterRiderRequest request) {
         return ResponseEntity.ok(authService.registerRider(request));
     }
 
     @PostMapping("/register/driver")
-    public ResponseEntity<AuthResponse> registerDriver(@RequestBody RegisterDriverRequest request) {
+    public ResponseEntity<AuthResponse> registerDriver(@RequestBody @Valid RegisterDriverRequest request) {
         return ResponseEntity.ok(authService.registerDriver(request));
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<AuthResponse> authenticate(@RequestBody AuthRequest request) {
+    public ResponseEntity<AuthResponse> authenticate(@RequestBody @Valid AuthRequest request) {
         return ResponseEntity.ok(authService.authenticate(request));
     }
 }

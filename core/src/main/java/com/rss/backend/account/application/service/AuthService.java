@@ -29,18 +29,16 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public AuthResponse registerRider(RegisterRiderRequest request) {
-        // Create User
+        validateUserNotExist(request.getEmail());
+
         var user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.RIDER)
                 .build();
-
-        // Save User
         userRepository.save(user);
 
-        // Create and Save Rider or Driver
         var rider = Rider.builder()
                 .debt(0)
                 .user(user)
@@ -55,15 +53,14 @@ public class AuthService {
     }
 
     public AuthResponse registerDriver(RegisterDriverRequest request) {
-        // Create User
+        validateUserNotExist(request.getEmail());
+
         var user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.DRIVER)
                 .build();
-
-        // Save User
         userRepository.save(user);
 
         // Create and Save Rider or Driver
@@ -95,6 +92,11 @@ public class AuthService {
         return AuthResponse.builder()
                 .token(jwtToken)
                 .build();
+    }
+
+    private void validateUserNotExist(String email) {
+        if(userRepository.existsByEmail(email))
+            throw new IllegalArgumentException("user already exists");
     }
 
 }

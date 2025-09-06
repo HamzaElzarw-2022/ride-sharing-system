@@ -1,6 +1,7 @@
 package com.rss.backend.account.application.dto;
 
-import com.rss.backend.account.domain.entity.Role;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,10 +12,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegisterRiderRequest {
-    private String username;
+    @Email
     private String email;
-    private String password;
-    private Role role;
 
-    private String preferredPaymentMethod;
+    @NotBlank
+    private String password;
+
+    @NotBlank
+    private String username;
 }

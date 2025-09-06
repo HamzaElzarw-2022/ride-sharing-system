@@ -1,5 +1,7 @@
 package com.rss.backend.account.application.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,9 +12,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegisterDriverRequest {
-    private String username;
+    @Email
     private String email;
+
+    @NotBlank
     private String password;
+
+    @NotBlank
+    private String username;
 
     private String licenseNumber;
     private String vehicleDetails;
