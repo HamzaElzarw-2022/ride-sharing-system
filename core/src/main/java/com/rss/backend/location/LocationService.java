@@ -1,19 +1,18 @@
 package com.rss.backend.location;
 
 import java.util.Set;
-import org.springframework.data.geo.Point;
 
 public interface LocationService {
 
     /**
-     * Store driver position in map unit coordinates (x,y)
+     * Store driver position in map unit coordinates (x,y) with orientation degree
      */
-    void updateDriverLocation(Long driverId, double x, double y);
+    void updateDriverLocation(Long driverId, double x, double y, double degree);
 
     /**
-     * Retrieve driver location in map unit; returns null if absent.
+     * Retrieve driver location in map unit with degree; returns null if absent.
      */
-    Point getDriverLocation(Long driverId);
+    DriverLocation getDriverLocation(Long driverId);
 
     /**
      * Find nearby drivers.

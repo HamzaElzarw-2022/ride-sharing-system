@@ -20,19 +20,29 @@ public class LocationManagement implements LocationService, LocationInternalApi 
     private final StringRedisTemplate stringRedisTemplate;
     private final GeoCoordinateMapper geoCoordinateMapper;
 
-    private static final String KEY_DRIVERS = "drivers";
+    private static final String DRIVER_LOCATION_KEY = "driver:location";
+    private static final String DRIVER_DEGREE_KEY = "driver:degree";
 
-    public void updateDriverLocation(Long driverId, double x, double y) {
+    @Override
+    public void updateDriverLocation(Long driverId, double x, double y, double degree) {
         Point redisPoint = geoCoordinateMapper.toRedisPoint(x, y);
-        stringRedisTemplate.opsForGeo().add(KEY_DRIVERS, redisPoint, driverId.toString());
+        stringRedisTemplate.opsForGeo().add(DRIVER_LOCATION_KEY, redisPoint, driverId.toString());
+        stringRedisTemplate.opsForValue().set(DEGREE_KEY(driverId), Double.toString(normalizeDegree(degree)));
     }
 
-    public Point getDriverLocation(Long driverId) {
-        Point p = getDriverLocationRaw(driverId);
-        if (p == null) return null;
-        return geoCoordinateMapper.fromRedisPoint(p);
+    @Override
+    public DriverLocation getDriverLocation(Long driverId) {
+        Point geoPoint = getDriverLocationRaw(driverId);
+        if (geoPoint == null) return null;
+        Point mapPoint = geoCoordinateMapper.fromRedisPoint(geoPoint);
+
+        String d = stringRedisTemplate.opsForValue().get(DEGREE_KEY(driverId));
+        double degree = d == null ? 0.0 : parseDegree(d);
+
+        return new DriverLocation(mapPoint.getX(), mapPoint.getY(), degree);
     }
 
+    @Override
     public Set<Long> findDriversWithinRadius(double x, double y, double radiusUnits) {
         if (radiusUnits <= 0 || Double.isNaN(radiusUnits) || Double.isInfinite(radiusUnits))
             return Set.of();
@@ -42,7 +52,7 @@ public class LocationManagement implements LocationService, LocationInternalApi 
         Distance distance = new Distance(radiusMeters, Metrics.METERS);
 
         GeoResults<GeoLocation<String>> results = stringRedisTemplate.opsForGeo().search(
-                KEY_DRIVERS,
+                DRIVER_LOCATION_KEY,
                 GeoReference.fromCoordinate(center),
                 distance
         );
@@ -55,11 +65,29 @@ public class LocationManagement implements LocationService, LocationInternalApi 
                 .collect(Collectors.toSet());
     }
 
+    private static String DEGREE_KEY(Long driverId) {
+        return DRIVER_DEGREE_KEY + ":" + driverId;
+    }
+
+    private static double normalizeDegree(double deg) {
+        double d = deg % 360.0;
+        if (d < 0) d += 360.0;
+        return d;
+    }
+
+    private static double parseDegree(String s) {
+        try {
+            return normalizeDegree(Double.parseDouble(s));
+        } catch (NumberFormatException e) {
+            return 0.0;
+        }
+    }
+
     /**
      * Retrieve driver location as raw Redis GEO point (lon,lat)
      */
     private Point getDriverLocationRaw(Long driverId) {
-        List<Point> pts = stringRedisTemplate.opsForGeo().position(KEY_DRIVERS, driverId.toString());
+        List<Point> pts = stringRedisTemplate.opsForGeo().position(DRIVER_LOCATION_KEY, driverId.toString());
         return (pts == null || pts.isEmpty()) ? null : pts.getFirst();
     }
 }
