@@ -38,7 +38,7 @@ public class TripServiceImpl implements TripService {
                 .build();
 
         tripRepository.save(trip);
-        requestDriverService.requestDriver(trip.getId());
+        requestDriverService.requestDriver(trip);
         return toDto(trip);
     }
 
