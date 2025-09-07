@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class SimulationEngine {
@@ -30,9 +31,30 @@ public class SimulationEngine {
 
         try (var exec = Executors.newVirtualThreadPerTaskExecutor()) {
             List<DriverAgent> drivers = new ArrayList<>();
-            for (int i = 0; i < scenario.getDriverCount(); i++) {
-                drivers.add(agentFactory.createDriver(i + 1, new Random(rng.nextLong())));
+
+            // Keep trying to satisfy required number of drivers
+            int target = scenario.getDriverCount();
+            long retryDelayMillis = 1000; // 1s backoff between rounds
+            int attempt = 0;
+            while (drivers.size() < target) {
+                int remaining = target - drivers.size();
+                attempt++;
+                System.out.println("[SimulationEngine] Creating drivers: have=" + drivers.size() + ", need=" + remaining + " (attempt " + attempt + ")");
+                for (int i = drivers.size(); i < target; i++) {
+                    try {
+                        var driver = agentFactory.createDriver(i + 1, new Random(rng.nextLong()));
+                        if (driver != null) {
+                            drivers.add(driver);
+                        }
+                    } catch (Exception e) {
+                        // swallow and retry in next round
+                    }
+                }
+                if (drivers.size() < target) {
+                    Thread.sleep(retryDelayMillis);
+                }
             }
+
             RiderWorkload riderWorkload = agentFactory.createRiderWorkload(scenario, new Random(rng.nextLong()));
 
             List<Callable<Void>> tasks = new ArrayList<>();
@@ -41,7 +63,7 @@ public class SimulationEngine {
             }
             tasks.add(() -> { riderWorkload.run(); return null; });
 
-            List<Future<Void>> futures = exec.invokeAll(tasks, scenario.getDurationSeconds(), java.util.concurrent.TimeUnit.SECONDS);
+            List<Future<Void>> futures = exec.invokeAll(tasks, scenario.getDurationSeconds(), TimeUnit.SECONDS);
 
             // After duration, request stop
             drivers.forEach(DriverAgent::stop);

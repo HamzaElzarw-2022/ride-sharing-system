@@ -10,12 +10,14 @@ public class DriverAgent implements Agent {
     private final int id;
     private final SimClock clock;
     private final Random rng;
+    private final DriverIdentity identity;
     private final AtomicBoolean running = new AtomicBoolean(true);
 
-    public DriverAgent(int id, SimClock clock, Random rng) {
+    public DriverAgent(int id, SimClock clock, Random rng, DriverIdentity identity) {
         this.id = id;
         this.clock = clock;
         this.rng = rng;
+        this.identity = identity;
     }
 
     @Override
