@@ -1,0 +1,102 @@
+package com.rss.core.account.application.service;
+
+import com.rss.core.account.application.dto.AuthRequest;
+import com.rss.core.account.application.dto.AuthResponse;
+import com.rss.core.account.application.dto.RegisterDriverRequest;
+import com.rss.core.account.application.dto.RegisterRiderRequest;
+import com.rss.core.account.application.port.out.JwtService;
+import com.rss.core.account.domain.entity.Role;
+import com.rss.core.account.domain.repository.DriverRepository;
+import com.rss.core.account.domain.repository.RiderRepository;
+import com.rss.core.account.domain.repository.UserRepository;
+import com.rss.core.account.domain.entity.Driver;
+import com.rss.core.account.domain.entity.Rider;
+import com.rss.core.account.domain.entity.User;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class AuthService {
+    private final UserRepository userRepository;
+    private final RiderRepository riderRepository;
+    private final DriverRepository driverRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
+
+    public AuthResponse registerRider(RegisterRiderRequest request) {
+        validateUserNotExist(request.getEmail());
+
+        var user = User.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(Role.RIDER)
+                .build();
+        userRepository.save(user);
+
+        var rider = Rider.builder()
+                .debt(0)
+                .user(user)
+                .build();
+        riderRepository.save(rider);
+
+        // Generate JWT
+        var jwtToken = jwtService.generateToken(user.getEmail());
+        return AuthResponse.builder()
+                .token(jwtToken)
+                .build();
+    }
+
+    public AuthResponse registerDriver(RegisterDriverRequest request) {
+        validateUserNotExist(request.getEmail());
+
+        var user = User.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(Role.DRIVER)
+                .build();
+        userRepository.save(user);
+
+        // Create and Save Rider or Driver
+        var driver = Driver.builder()
+                .licenseNumber(request.getLicenseNumber())
+                .vehicleDetails(request.getVehicleDetails())
+                .credit(0)
+                .user(user)
+                .build();
+        driverRepository.save(driver);
+
+        // Generate JWT
+        var jwtToken = jwtService.generateToken(user.getEmail());
+        return AuthResponse.builder()
+                .token(jwtToken)
+                .build();
+    }
+
+    public AuthResponse authenticate(AuthRequest request) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
+        var user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow();
+        var jwtToken = jwtService.generateToken(user.getEmail());
+        return AuthResponse.builder()
+                .token(jwtToken)
+                .build();
+    }
+
+    private void validateUserNotExist(String email) {
+        if(userRepository.existsByEmail(email))
+            throw new IllegalArgumentException("user already exists");
+    }
+
+}
