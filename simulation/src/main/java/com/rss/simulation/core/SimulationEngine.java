@@ -52,6 +52,7 @@ public class SimulationEngine {
                 }
                 if (drivers.size() < target) {
                     Thread.sleep(retryDelayMillis);
+                    retryDelayMillis *= 2; // Exponential backoff
                 }
             }
 
