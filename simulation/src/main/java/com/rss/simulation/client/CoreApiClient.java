@@ -28,4 +28,30 @@ public class CoreApiClient {
         .retrieve()
         .bodyToMono(AuthResponse.class);
   }
+
+  public Mono<RouteResponse> getRoute(Point start, Point end, String jwt) {
+    return post("/api/map/route", new RouteRequest(start, end), jwt, RouteResponse.class);
+  }
+
+  public Mono<RouteResponse> getSimRoute(SimRouteRequest req, String jwt) {
+    return post("/api/map/simRoute", req, jwt, RouteResponse.class);
+  }
+
+  private <T> Mono<T> post(String uri, Object reqBody, String jwt, Class<T> clazz) {
+    var spec = client.post()
+        .uri(uri)
+        .contentType(MediaType.APPLICATION_JSON);
+
+    if(jwt != null && !jwt.isBlank()) {
+        spec.header("Authorization", "Bearer " + jwt);
+    }
+    return spec
+        .bodyValue(reqBody)
+        .retrieve()
+        .bodyToMono(clazz);
+  }
+
+    public void updateLocation(Point location, double degree, String jwt) {
+
+    }
 }
