@@ -18,15 +18,17 @@ public class DriverAgent implements Agent {
     private final Random rng;
     private final DriverIdentity identity;
     private final AtomicBoolean running = new AtomicBoolean(true);
-    private final Integer timeToNextMove = 3000; // milliseconds
-    private final double idleSpeedFactor = 0.3; // move slower when idle
     private final CoreApiClient coreApiClient;
+
+    private final Integer tickTime = 3000; // milliseconds
+    private final double idleSpeedFactor = 0.3; // move slower when idle
+    private Integer remainingTime = 0;
 
     private State state = State.IDLE;
     private TripDto trip;
 
     private List<Direction> directions;
-    private int nextDirectionIndex;
+    private int directionIndex;
 
     private Point location;
     private double degree;
@@ -44,13 +46,15 @@ public class DriverAgent implements Agent {
         location = new Point(rng.nextInt(0, 500), rng.nextInt(0, 500));
         try {
             while (running.get()) {
-                if(state == State.IDLE) acceptTrip();
-
-                if(directions != null && nextDirectionIndex < directions.size()) move(timeToNextMove/1000);
-                else if(state == State.IDLE) getDirections(new Point(rng.nextInt(0, 500), rng.nextInt(0, 500)));
+                if(state == State.IDLE)
+                    acceptTrip();
+                if(directions != null) {
+                    remainingTime = move((double) tickTime /1000 + remainingTime);
+                    updateLocation();
+                }
 
                 System.out.println("[DriverAgent] id=" + id + " tick; clock x" + clock.factor());
-                clock.sleep(Duration.ofMillis(timeToNextMove));
+                clock.sleep(Duration.ofMillis(tickTime));
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -63,14 +67,48 @@ public class DriverAgent implements Agent {
     @Override
     public String name() { return identity.getUsername(); }
 
-    private void move(Integer timeElapsed) {
-        // simulate movement from location to next direction based on speed
-        // if on pickup reached startTrip
-        // if destination reached endTrip
-        // if idle get route to random point
-        // if idle move slower
+    private int move(double time) {
+        Direction target = directions.get(directionIndex);
+        double targetX = target.x();
+        double targetY = target.y();
 
-        updateLocation(); // send location update
+        double dx = targetX - location.x();
+        double dy = targetY - location.y();
+        double distanceToTarget = Math.hypot(dx, dy);
+
+        degree = Math.toDegrees(Math.atan2(dy, dx));
+        double speed = target.speed();
+        if (state == State.IDLE) {
+            speed = speed * idleSpeedFactor;
+        }
+
+        double maxMove = speed * time;
+        if (maxMove < distanceToTarget) {
+            // We cannot reach the target this tick: move proportionally and consume all time
+            double ratio = maxMove / distanceToTarget;
+            double newX = location.x() + dx * ratio;
+            double newY = location.y() + dy * ratio;
+            location = new Point(newX, newY);
+            return 0;
+        } else {
+            // We can reach the target: snap to it and save leftover time
+            double timeUsed = distanceToTarget / speed;
+            location = new Point(targetX, targetY);
+            int leftover = (int) Math.round(time - timeUsed);
+            directionIndex++;
+
+            // Check for completion
+            if (directionIndex >= directions.size()) {
+                if (state == State.ON_PICKUP) {
+                    startTrip();
+                } else if (state == State.ON_TRIP) {
+                    endTrip();
+                } else if (state == State.IDLE) {
+                    getDirections(new Point(rng.nextInt(0, 500), rng.nextInt(0, 500)));
+                }
+            }
+            return leftover;
+        }
     }
 
     private void acceptTrip() {
@@ -100,12 +138,11 @@ public class DriverAgent implements Agent {
     private void endTrip() {
         coreApiClient.endTrip(trip.id(), identity.getJwt());
         state = State.IDLE;
-        directions = null;
         trip = null;
+        getDirections(new Point(rng.nextInt(0, 500), rng.nextInt(0, 500)));
     }
 
     private void getDirections(Point point) {
-        nextDirectionIndex++;
         directions = null;
         var res = coreApiClient.getRoute(location, point, identity.getJwt());
         res.subscribe(routeRes -> {
@@ -130,7 +167,7 @@ public class DriverAgent implements Agent {
             }
 
             directions = newDirections;
-            nextDirectionIndex = 0;
+            directionIndex = 0;
         });
     }
 
