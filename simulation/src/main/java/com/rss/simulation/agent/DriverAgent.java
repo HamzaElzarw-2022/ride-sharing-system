@@ -5,10 +5,12 @@ import com.rss.simulation.client.dto.Direction;
 import com.rss.simulation.client.dto.Point;
 import com.rss.simulation.client.dto.TripDto;
 import com.rss.simulation.clock.SimClock;
+import com.rss.simulation.trip.TripRequestInbox;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -19,6 +21,7 @@ public class DriverAgent implements Agent {
     private final DriverIdentity identity;
     private final AtomicBoolean running = new AtomicBoolean(true);
     private final CoreApiClient coreApiClient;
+    private final TripRequestInbox tripRequestInbox;
 
     private final Integer tickTime = 3000; // milliseconds
     private final double idleSpeedFactor = 0.3; // move slower when idle
@@ -33,17 +36,19 @@ public class DriverAgent implements Agent {
     private Point location;
     private double degree;
 
-    public DriverAgent(int id, SimClock clock, Random rng, DriverIdentity identity, CoreApiClient coreApiClient) {
+    public DriverAgent(int id, SimClock clock, Random rng, DriverIdentity identity, CoreApiClient coreApiClient, TripRequestInbox tripRequestInbox) {
         this.id = id;
         this.clock = clock;
         this.rng = rng;
         this.identity = identity;
         this.coreApiClient = coreApiClient;
+        this.tripRequestInbox = tripRequestInbox;
     }
 
     @Override
     public void run() {
         location = new Point(rng.nextInt(0, 500), rng.nextInt(0, 500));
+        getDirections(new Point(rng.nextInt(0, 500), rng.nextInt(0, 500)));
         try {
             while (running.get()) {
                 if(state == State.IDLE)
@@ -112,15 +117,28 @@ public class DriverAgent implements Agent {
     }
 
     private void acceptTrip() {
-        List<Long> tripIds = List.of(1L); // TODO: replace with actual nearby trips
+        Long driverId = identity.getId();
+        if (driverId == null) {
+            return; // identity not fully ready yet
+        }
 
-        for(Long tripId : tripIds) {
-            trip = coreApiClient.acceptTrip(tripId, identity.getJwt()).block();
-            if(trip != null) {
+        Optional<Long> MaybeTripId = tripRequestInbox.pollNext(driverId);
+        while (MaybeTripId.isPresent()) {
+            Long tripId = MaybeTripId.get();
+            try {
+                trip = coreApiClient.acceptTrip(tripId, identity.getJwt()).block();
+            } catch (Exception e) {
+                trip = null;
+            }
+            if (trip != null) {
                 getDirections(new Point(trip.startLatitude(), trip.startLongitude()));
                 state = State.ON_PICKUP;
+                System.out.println("[DriverAgent] id=" + id + " accepted tripId=" + tripId);
                 break;
+            } else {
+                System.out.println("[DriverAgent] id=" + id + " failed to accept tripId=" + tripId + " (maybe already taken)");
             }
+            MaybeTripId = tripRequestInbox.pollNext(driverId);
         }
     }
 
