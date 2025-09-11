@@ -31,7 +31,7 @@ public class CoreApiClient {
 
     public void updateLocation(Point location, double degree, String jwt) {
         post("/api/drivers/location/update?x=" + location.x()+ "&y=" + location.y() + "&degree=" + degree,
-                jwt, Void.class);
+                jwt, Void.class).subscribe();
     }
 
     public Mono<TripDto> acceptTrip(Long tripId, String jwt) {

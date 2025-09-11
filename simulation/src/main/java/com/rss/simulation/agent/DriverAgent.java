@@ -154,7 +154,7 @@ public class DriverAgent implements Agent {
     }
 
     private void endTrip() {
-        coreApiClient.endTrip(trip.id(), identity.getJwt());
+        coreApiClient.endTrip(trip.id(), identity.getJwt()).subscribe();
         state = State.IDLE;
         trip = null;
         getDirections(new Point(rng.nextInt(0, 500), rng.nextInt(0, 500)));
