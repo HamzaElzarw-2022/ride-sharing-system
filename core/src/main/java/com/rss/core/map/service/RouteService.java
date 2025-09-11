@@ -158,8 +158,8 @@ public class RouteService implements MapInternalApi {
                 }
 
                 routeSteps.add(RouteStep.builder()
-                        .targetX(node.getLatitude())
-                        .targetY(node.getLongitude())
+                        .x(node.getLatitude())
+                        .y(node.getLongitude())
                         .speed(speed)
                         .instruction(instruction)
                         .build());
@@ -167,16 +167,16 @@ public class RouteService implements MapInternalApi {
 
             // Add final step to target point
             routeSteps.add(RouteStep.builder()
-                    .targetX((long) targetCoordinate.getX())
-                    .targetY((long) targetCoordinate.getY())
+                    .x((long) targetCoordinate.getX())
+                    .y((long) targetCoordinate.getY())
                     .speed(targetEdge.getSpeed())
                     .instruction("Arrive at destination")
                     .build());
         } else {
             // No path found
             routeSteps.add(RouteStep.builder()
-                    .targetX(startNode.getLatitude())
-                    .targetY(startNode.getLongitude())
+                    .x(startNode.getLatitude())
+                    .y(startNode.getLongitude())
                     .speed(currentSpeed)
                     .instruction("No route found")
                     .build());

@@ -8,8 +8,8 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 public class RouteStep {
-    private long targetY;
-    private long targetX;
+    private long x;
+    private long y;
     private int speed;
     private String instruction;
 }
