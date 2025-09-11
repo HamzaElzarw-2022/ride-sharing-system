@@ -2,7 +2,7 @@ package com.rss.core.map.controller;
 
 import com.rss.core.map.dto.RouteRequest;
 import com.rss.core.map.dto.RouteResponse;
-import com.rss.core.map.dto.simRouteRequest;
+import com.rss.core.map.dto.SimRouteRequest;
 import com.rss.core.map.model.EdgeProjectionPoint;
 import com.rss.core.map.service.RouteService;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ public class RouteController {
     }
 
     @PostMapping(value = "/simRoute")
-    public ResponseEntity<RouteResponse> getSimRoute(@RequestBody simRouteRequest request) {
+    public ResponseEntity<RouteResponse> getSimRoute(@RequestBody SimRouteRequest request) {
         return ResponseEntity.ok(routeService.getSimRoute(request));
     }
 

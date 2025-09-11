@@ -6,7 +6,7 @@ import com.rss.core.map.entity.Node;
 import com.rss.core.map.dto.EdgeDTO;
 import com.rss.core.map.dto.RouteRequest;
 import com.rss.core.map.dto.RouteResponse;
-import com.rss.core.map.dto.simRouteRequest;
+import com.rss.core.map.dto.SimRouteRequest;
 import com.rss.core.map.model.EdgeProjectionPoint;
 import com.rss.core.map.model.RouteStep;
 import com.rss.core.map.repository.EdgeRepository;
@@ -36,7 +36,7 @@ public class RouteService implements MapInternalApi {
                 .build();
     }
 
-    public RouteResponse getSimRoute(simRouteRequest request) {
+    public RouteResponse getSimRoute(SimRouteRequest request) {
 
         EdgeProjectionPoint destinationProjection = findClosestEdge(request.getDestinationPoint());
         List<RouteStep> route = searchRoute(request.getCurrentSpeed(), request.getNodeDirectedTo(), destinationProjection);

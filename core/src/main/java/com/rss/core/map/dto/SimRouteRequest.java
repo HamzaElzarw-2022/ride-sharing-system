@@ -8,7 +8,7 @@ import org.springframework.data.geo.Point;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class simRouteRequest {
+public class SimRouteRequest {
     private Integer currentSpeed;
     private Long nodeDirectedTo;
     private Point destinationPoint;
