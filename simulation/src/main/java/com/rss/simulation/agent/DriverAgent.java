@@ -117,9 +117,10 @@ public class DriverAgent implements Agent {
     }
 
     private void acceptTrip() {
-        Long driverId = identity.getId();
+        Long driverId = identity.getDriverId();
         if (driverId == null) {
-            return; // identity not fully ready yet
+            System.err.println("[DriverAgent] id=" + id + " has no driverId, cannot accept trips");
+            return;
         }
 
         Optional<Long> MaybeTripId = tripRequestInbox.pollNext(driverId);
@@ -146,6 +147,7 @@ public class DriverAgent implements Agent {
         trip = coreApiClient.startTrip(trip.id(), identity.getJwt()).block();
         if(trip != null) {
             getDirections(new Point(trip.endLatitude(), trip.endLongitude()));
+            System.out.println("[DriverAgent] id=" + id + " started tripId=" + trip.id());
             state = State.ON_TRIP;
         } else {
             System.out.println("[DriverAgent] id=" + id + " failed to start trip");
@@ -157,6 +159,7 @@ public class DriverAgent implements Agent {
         coreApiClient.endTrip(trip.id(), identity.getJwt()).subscribe();
         state = State.IDLE;
         trip = null;
+        System.out.println("[DriverAgent] id=" + id + " ended trip and is now IDLE");
         getDirections(new Point(rng.nextInt(0, 500), rng.nextInt(0, 500)));
     }
 

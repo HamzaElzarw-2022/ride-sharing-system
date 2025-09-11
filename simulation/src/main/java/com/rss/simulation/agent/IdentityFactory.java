@@ -19,6 +19,7 @@ public class IdentityFactory {
 
     public DriverIdentity createDriverIdentity(int id) {
         var identity = new DriverIdentity(
+                id,
                 "sim-driver-" + id,
                 "driver-" + id + "@" + identityProperties.getEmailDomain(),
                 identityProperties.getDefaultPassword()
@@ -31,7 +32,12 @@ public class IdentityFactory {
             );
             var reg = coreApiClient.registerDriver(regReq).block();
             if (reg != null && reg.token() != null) {
+
                 identity.setJwt(reg.token());
+                identity.setUserId(reg.userId());
+                identity.setDriverId(reg.driverId());
+                identity.setRiderId(reg.riderId());
+
                 System.out.println("[DriverAgent] registered+authed: " + identity.getEmail());
                 return identity;
             }
