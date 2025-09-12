@@ -23,6 +23,7 @@ public class TripServiceImpl implements TripService {
     private final LocationInternalApi locationInternalApi;
     private final MapInternalApi mapInternalApi;
     private final RequestDriverService requestDriverService;
+    private final TripMatchingTracker tripMatchingTracker;
 
     @Override
     public TripDto createTrip(Long riderId, Point start, Point end) {
@@ -38,6 +39,11 @@ public class TripServiceImpl implements TripService {
                 .build();
 
         tripRepository.save(trip);
+        // Track trip in MATCHING state for timeout handling
+        try {
+            long createdAtMillis = java.time.ZonedDateTime.now().toInstant().toEpochMilli();
+            tripMatchingTracker.addMatchingTrip(trip.getId(), createdAtMillis);
+        } catch (Exception ignored) {}
         requestDriverService.requestDriver(trip);
         return toDto(trip);
     }
@@ -58,6 +64,8 @@ public class TripServiceImpl implements TripService {
         trip.setDriverId(driverId);
         trip.setStatus(TripStatus.PICKING_UP);
         tripRepository.save(trip);
+        // remove from matching tracking since it is accepted
+        try { tripMatchingTracker.removeMatchingTrip(tripId); } catch (Exception ignored) {}
 
         return toDto(trip);
     }

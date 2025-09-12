@@ -44,6 +44,11 @@ public class Trip {
     private Double fare;
 
     public enum TripStatus {
-        MATCHING, PICKING_UP, STARTED, COMPLETED, CANCELLED
+        MATCHING,
+        PICKING_UP,
+        STARTED,
+        COMPLETED,
+        CANCELLED,
+        NO_DRIVERS_MATCHED
     }
 }
