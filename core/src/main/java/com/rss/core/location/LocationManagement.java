@@ -65,6 +65,31 @@ public class LocationManagement implements LocationService, LocationInternalApi 
                 .collect(Collectors.toSet());
     }
 
+    @Override
+    public Set<Long> findNearbyDrivers(double x, double y) {
+        double startRadiusUnits = 50;
+        double maxRadiusUnits = 5000;
+        double growthFactor = 2.0;
+
+        if (Double.isNaN(x) || Double.isNaN(y) || Double.isInfinite(x) || Double.isInfinite(y))
+            return Set.of();
+
+        double radius = startRadiusUnits;
+        while (radius > 0 && radius <= maxRadiusUnits) {
+            Set<Long> found = findDriversWithinRadius(x, y, radius);
+            if (!found.isEmpty()) {
+                return found;
+            }
+            // Increase radius
+            double next = radius * growthFactor;
+            if (next == radius) { // guard against no change due to precision
+                next += 1.0;
+            }
+            radius = next;
+        }
+        return Set.of();
+    }
+
     private static String DEGREE_KEY(Long driverId) {
         return DRIVER_DEGREE_KEY + ":" + driverId;
     }

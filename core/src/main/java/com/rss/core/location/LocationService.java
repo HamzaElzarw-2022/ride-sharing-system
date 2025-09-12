@@ -23,4 +23,11 @@ public interface LocationService {
      * Validation: radiusUnits must be positive and not NaN/Infinite; otherwise empty set is returned.
      */
     Set<Long> findDriversWithinRadius(double x, double y, double radiusUnits);
+
+    /**
+     * Find nearby drivers by starting with a default radius and progressively increasing it
+     * until drivers are found or a maximum threshold is reached.
+     * Implementation should return an empty set if none are found within the threshold.
+     */
+    Set<Long> findNearbyDrivers(double x, double y);
 }

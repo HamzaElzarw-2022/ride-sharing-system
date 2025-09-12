@@ -22,7 +22,6 @@ public class RequestDriverServiceImpl implements RequestDriverService {
     private final LocationInternalApi locationInternalApi;
     private final NotificationService notificationService;
 
-    private final int DRIVER_SEARCH_RADIUS_METERS = 5000; // 5 km
     private final int BATCH_SIZE = 5; // number of drivers to notify at once
     @Value("${driver.request.expiry.seconds:180}")
     private int driverRequestExpirySeconds; // configurable for tests
@@ -30,10 +29,9 @@ public class RequestDriverServiceImpl implements RequestDriverService {
 
     @Override
     public void requestDriver(Trip trip) {
-        Set<Long> driverIds = locationInternalApi.findDriversWithinRadius(
+        Set<Long> driverIds = locationInternalApi.findNearbyDrivers(
                 trip.getStartPoint().getX(),
-                trip.getStartPoint().getY(),
-                DRIVER_SEARCH_RADIUS_METERS);
+                trip.getStartPoint().getY());
 
         if (driverIds.isEmpty()) {
             return; // No drivers available in range
