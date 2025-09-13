@@ -1,6 +1,7 @@
 package com.rss.simulation.core;
 
 import com.rss.simulation.agent.DriverAgent;
+import com.rss.simulation.agent.Identity.Role;
 import com.rss.simulation.agent.IdentityFactory;
 import com.rss.simulation.agent.RiderWorkload;
 import com.rss.simulation.client.CoreApiClient;
@@ -26,11 +27,11 @@ public class AgentFactory {
     }
 
     public DriverAgent createDriver(int id, Random rng) {
-        var identity = identityFactory.createDriverIdentity(id);
+        var identity = identityFactory.createIdentity(id, Role.DRIVER);
         return identity == null ? null : new DriverAgent(id, clock, rng, identity, coreApiClient, tripRequestInbox);
     }
 
     public RiderWorkload createRiderWorkload(Scenario scenario, Random rng) {
-        return new RiderWorkload(clock, scenario.getRiderRequestsPerSecond(), rng);
+        return new RiderWorkload(clock, scenario.getRiderCount(), rng);
     }
 }

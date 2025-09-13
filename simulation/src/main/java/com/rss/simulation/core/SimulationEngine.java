@@ -23,7 +23,7 @@ public class SimulationEngine {
 
     public void run(Scenario scenario) throws InterruptedException {
         System.out.println("[SimulationEngine] Starting scenario: drivers=" + scenario.getDriverCount()
-                + ", rps=" + scenario.getRiderRequestsPerSecond()
+                + ", riders=" + scenario.getRiderCount()
                 + ", durationSec=" + scenario.getDurationSeconds()
                 + ", timeFactor=" + scenario.getTimeFactor());
 

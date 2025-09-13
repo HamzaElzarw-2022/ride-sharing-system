@@ -7,20 +7,20 @@ import java.util.Random;
 
 public class RiderWorkload implements Runnable {
     private final SimClock clock;
-    private final double rps; // requests per second
+    private final double riderCount; // requests per second
     private final Random rng;
     private volatile boolean running = true;
 
-    public RiderWorkload(SimClock clock, double rps, Random rng) {
+    public RiderWorkload(SimClock clock, int riderCount, Random rng) {
         this.clock = clock;
-        this.rps = rps;
+        this.riderCount = riderCount;
         this.rng = rng;
     }
 
     @Override
     public void run() {
         try {
-            long intervalMillis = rps <= 0 ? Long.MAX_VALUE : (long) (1000.0 / rps);
+            long intervalMillis = 1000;
             while (running) {
                 // Placeholder: issue a trip request to backend
                 System.out.println("[RiderWorkload] issuing request");

@@ -1,7 +1,8 @@
 package com.rss.simulation.agent;
 
-public class DriverIdentity {
+public class Identity {
     private final Integer id;
+    private final Role role;
     private final String username;
     private final String email;
     private final String password;
@@ -10,8 +11,9 @@ public class DriverIdentity {
     private Long driverId;
     private Long riderId;
 
-    public DriverIdentity(Integer id, String username, String email, String password) {
+    public Identity(Integer id, Role role, String username, String email, String password) {
     this.id = id;
+    this.role = role;
     this.username = username;
     this.email = email;
     this.password = password;
@@ -19,6 +21,9 @@ public class DriverIdentity {
 
     public Integer getId() {
         return id;
+    }
+    public Role getRole() {
+        return role;
     }
     public String getUsername() {
       return username;
@@ -52,5 +57,10 @@ public class DriverIdentity {
     }
     public void setJwt(String jwt) {
       this.jwt = jwt;
+    }
+
+    public enum Role{
+        DRIVER,
+        RIDER
     }
 }

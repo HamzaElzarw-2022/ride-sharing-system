@@ -17,6 +17,10 @@ public class CoreApiClient {
         return post("/api/auth/register/driver", req, null, AuthResponse.class);
     }
 
+    public Mono<AuthResponse> registerRider(RegisterRiderRequest req) {
+        return post("/api/auth/register/rider", req, null, AuthResponse.class);
+    }
+
     public Mono<AuthResponse> authenticate(AuthRequest req) {
         return post("/api/auth/authenticate", req, null, AuthResponse.class);
     }

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "sim")
 public class Scenario {
     private int driverCount = 10;
-    private double riderRequestsPerSecond = 1.0;
+    private int riderCount = 7;
     private long durationSeconds = 30; // demo length
     private double timeFactor = 1.0; // 1 = real-time, 10 = 10x faster sleeps
     private long seed = 42L;
@@ -15,8 +15,8 @@ public class Scenario {
     public int getDriverCount() { return driverCount; }
     public void setDriverCount(int driverCount) { this.driverCount = driverCount; }
 
-    public double getRiderRequestsPerSecond() { return riderRequestsPerSecond; }
-    public void setRiderRequestsPerSecond(double riderRequestsPerSecond) { this.riderRequestsPerSecond = riderRequestsPerSecond; }
+    public int getRiderCount() { return riderCount; }
+    public void setRiderCount(int riderCount) { this.riderCount = riderCount; }
 
     public long getDurationSeconds() { return durationSeconds; }
     public void setDurationSeconds(long durationSeconds) { this.durationSeconds = durationSeconds; }
