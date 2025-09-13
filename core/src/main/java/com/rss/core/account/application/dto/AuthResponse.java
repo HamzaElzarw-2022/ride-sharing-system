@@ -11,4 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AuthResponse {
     private String token;
+    private Long driverId;
+    private Long riderId;
+    private Long userId;
 }

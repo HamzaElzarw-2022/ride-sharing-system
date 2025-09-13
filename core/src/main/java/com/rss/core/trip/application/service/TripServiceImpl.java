@@ -27,7 +27,7 @@ public class TripServiceImpl implements TripService {
 
     @Override
     public TripDto createTrip(Long riderId, Point start, Point end) {
-        if(tripRepository.existsByRiderIdAndStatusNotIn(riderId, List.of(TripStatus.COMPLETED, TripStatus.CANCELLED)))
+        if(tripRepository.existsByRiderIdAndStatusNotIn(riderId, List.of(TripStatus.COMPLETED, TripStatus.CANCELLED, TripStatus.NO_DRIVERS_MATCHED)))
             throw new IllegalStateException("Driver is already in a trip");
 
         Trip trip = Trip.builder()
@@ -142,10 +142,10 @@ public class TripServiceImpl implements TripService {
                 .status(trip.getStatus())
                 .riderId(trip.getRiderId())
                 .driverId(trip.getDriverId())
-                .startLatitude(trip.getStartPoint() != null ? trip.getStartPoint().getY() : null)
-                .startLongitude(trip.getStartPoint() != null ? trip.getStartPoint().getX() : null)
-                .endLatitude(trip.getEndPoint() != null ? trip.getEndPoint().getY() : null)
-                .endLongitude(trip.getEndPoint() != null ? trip.getEndPoint().getX() : null)
+                .startLatitude(trip.getStartPoint() != null ? trip.getStartPoint().getX() : null)
+                .startLongitude(trip.getStartPoint() != null ? trip.getStartPoint().getY() : null)
+                .endLatitude(trip.getEndPoint() != null ? trip.getEndPoint().getX() : null)
+                .endLongitude(trip.getEndPoint() != null ? trip.getEndPoint().getY() : null)
                 .createdAt(trip.getCreatedAt())
                 .startTime(trip.getStartTime())
                 .endTime(trip.getEndTime())

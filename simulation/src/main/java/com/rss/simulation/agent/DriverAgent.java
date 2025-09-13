@@ -179,12 +179,12 @@ public class DriverAgent implements Agent {
 
             newDirections.addAll(routeRes.route());
             if(routeRes.destinationPointProjection() != null) {
-                var start = new Direction(
+                var end = new Direction(
                         (long) routeRes.destinationPointProjection().projectionPoint().x(),
                         (long) routeRes.destinationPointProjection().projectionPoint().y(),
                         60
                 );
-                newDirections.add(start);
+                newDirections.add(end);
             }
 
             directions = newDirections;

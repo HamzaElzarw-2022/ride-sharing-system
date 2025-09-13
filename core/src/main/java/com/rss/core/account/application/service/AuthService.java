@@ -49,6 +49,8 @@ public class AuthService {
         var jwtToken = jwtService.generateToken(user.getEmail());
         return AuthResponse.builder()
                 .token(jwtToken)
+                .userId(user.getId())
+                .riderId(rider.getId())
                 .build();
     }
 
@@ -76,6 +78,8 @@ public class AuthService {
         var jwtToken = jwtService.generateToken(user.getEmail());
         return AuthResponse.builder()
                 .token(jwtToken)
+                .driverId(driver.getId())
+                .userId(user.getId())
                 .build();
     }
 
@@ -91,6 +95,9 @@ public class AuthService {
         var jwtToken = jwtService.generateToken(user.getEmail());
         return AuthResponse.builder()
                 .token(jwtToken)
+                .userId(user.getId())
+                .driverId((user.getDriver() != null) ? user.getDriver().getId() : null)
+                .riderId((user.getRider() != null) ? user.getRider().getId() : null)
                 .build();
     }
 
