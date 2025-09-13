@@ -5,6 +5,7 @@ import com.rss.core.map.MapInternalApi;
 import com.rss.core.trip.application.dto.TripDto;
 import com.rss.core.trip.application.port.in.RequestDriverService;
 import com.rss.core.trip.application.port.in.TripService;
+import com.rss.core.trip.application.port.out.NotificationService;
 import com.rss.core.trip.domain.entity.Trip;
 import com.rss.core.trip.domain.entity.Trip.TripStatus;
 import com.rss.core.trip.domain.repository.TripRepository;
@@ -24,10 +25,12 @@ public class TripServiceImpl implements TripService {
     private final MapInternalApi mapInternalApi;
     private final RequestDriverService requestDriverService;
     private final TripMatchingTracker tripMatchingTracker;
+    private final NotificationService notificationService;
 
     @Override
     public TripDto createTrip(Long riderId, Point start, Point end) {
-        if(tripRepository.existsByRiderIdAndStatusNotIn(riderId, List.of(TripStatus.COMPLETED, TripStatus.CANCELLED, TripStatus.NO_DRIVERS_MATCHED)))
+        if(tripRepository.existsByRiderIdAndStatusNotIn(riderId,
+                List.of(TripStatus.COMPLETED, TripStatus.CANCELLED, TripStatus.NO_DRIVERS_MATCHED)))
             throw new IllegalStateException("Driver is already in a trip");
 
         Trip trip = Trip.builder()
@@ -45,12 +48,14 @@ public class TripServiceImpl implements TripService {
             tripMatchingTracker.addMatchingTrip(trip.getId(), createdAtMillis);
         } catch (Exception ignored) {}
         requestDriverService.requestDriver(trip);
+        System.out.println("Rider=" + riderId + ", CREATED trip=" + trip.getId());
         return toDto(trip);
     }
 
     @Override
     public TripDto acceptTrip(Long driverId, Long tripId) {
-        if(tripRepository.existsByDriverIdAndStatusNotIn(driverId, List.of(TripStatus.COMPLETED, TripStatus.CANCELLED)))
+        if(tripRepository.existsByDriverIdAndStatusNotIn(driverId,
+                List.of(TripStatus.COMPLETED, TripStatus.CANCELLED, TripStatus.NO_DRIVERS_MATCHED)))
             throw new IllegalStateException("Driver is already in a trip");
 
         Trip trip = tripRepository.findById(tripId)
@@ -67,6 +72,7 @@ public class TripServiceImpl implements TripService {
         // remove from matching tracking since it is accepted
         try { tripMatchingTracker.removeMatchingTrip(tripId); } catch (Exception ignored) {}
 
+        System.out.println("Driver=" + driverId + ", ACCEPTED trip=" + tripId);
         return toDto(trip);
     }
 
@@ -92,6 +98,7 @@ public class TripServiceImpl implements TripService {
         trip.setStartTime(LocalDateTime.now());
         tripRepository.save(trip);
 
+        System.out.println("Driver=" + driverId + ", STARTED trip=" + tripId + ", actual=" + driverLocation + ", expected=" + trip.getStartPoint());
         return toDto(trip);
     }
 
@@ -115,7 +122,9 @@ public class TripServiceImpl implements TripService {
 
         trip.setStatus(TripStatus.COMPLETED);
         trip.setEndTime(LocalDateTime.now());
+        System.out.println("Driver=" + driverId + ", ENDED trip=" + tripId + ", actual=" + driverLocation + ", expected=" + trip.getEndPoint());
         tripRepository.save(trip);
+        notificationService.NotifyRiderTripEnded(trip.getRiderId(), trip.getId());
     }
 
     @Override
@@ -127,8 +136,16 @@ public class TripServiceImpl implements TripService {
     }
 
     @Override
-    public List<TripDto> getTripHistory(Long riderId) {
+    public List<TripDto> getRiderTrips(Long riderId) {
         return tripRepository.findAllByRiderId(riderId)
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    @Override
+    public List<TripDto> getDriverTrips(Long driverId) {
+        return tripRepository.findAllByDriverId(driverId)
                 .stream()
                 .map(this::toDto)
                 .toList();

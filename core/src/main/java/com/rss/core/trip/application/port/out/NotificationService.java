@@ -6,4 +6,5 @@ public interface NotificationService {
 
     void NotifyDriverRequest(Long driverId, Long tripId);
     void NotifyDriverRequest(List<Long> driverIds, Long tripId);
+    void NotifyRiderTripEnded(Long riderId, Long tripId);
 }

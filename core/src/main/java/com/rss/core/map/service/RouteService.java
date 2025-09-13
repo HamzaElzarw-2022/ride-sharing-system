@@ -218,7 +218,7 @@ public class RouteService implements MapInternalApi {
             return null; // TODO: throw exception
         }
 
-        System.out.println("NUMBER OF CANDIDATES: " + candidateEdges.size() + " SEARCH RADIUS: " + searchRadius/2);
+//        System.out.println("NUMBER OF CANDIDATES: " + candidateEdges.size() + " SEARCH RADIUS: " + searchRadius/2);
 
         EdgeProjectionPoint closestProjection = null;
         double minDistance = Double.MAX_VALUE;

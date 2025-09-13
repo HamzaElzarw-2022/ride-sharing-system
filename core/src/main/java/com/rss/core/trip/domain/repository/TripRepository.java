@@ -13,6 +13,8 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
 
     List<Trip> findAllByRiderId(Long riderId);
 
+    List<Trip> findAllByDriverId(Long driverId);
+
     boolean existsByDriverIdAndStatusNotIn(Long driverId, List<TripStatus> tripStatus);
 
     boolean existsByRiderIdAndStatusNotIn(Long riderId, List<TripStatus> tripStatus);

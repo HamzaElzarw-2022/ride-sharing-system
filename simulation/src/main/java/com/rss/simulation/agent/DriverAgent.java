@@ -58,7 +58,7 @@ public class DriverAgent implements Agent {
                     updateLocation();
                 }
 
-                System.out.println("[DriverAgent] id=" + id + " tick; clock x" + clock.factor());
+                System.out.println("[DriverAgent] id=" + id + " driverId=" + identity.getDriverId() + "; state=" + state + "; loc=" + location + "; deg=" + degree + (trip != null ? "; tripId=" + trip.id() : ""));
                 clock.sleep(Duration.ofMillis(tickTime));
             }
         } catch (InterruptedException e) {

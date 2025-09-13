@@ -46,7 +46,7 @@ public class GeoCoordinateMapper {
         double lat = centerLat + dy * metersPerUnit * DEG_PER_METER_LAT;
         lon = clamp(lon, -180, 180);
         lat = clamp(lat, -85, 85);
-        System.out.println("Mapped (" + x + "," + y + ") to Redis Point(" + lon + "," + lat + ")");
+//        System.out.println("Mapped (" + x + "," + y + ") to Redis Point(" + lon + "," + lat + ")");
         return new Point(lon, lat);
     }
 

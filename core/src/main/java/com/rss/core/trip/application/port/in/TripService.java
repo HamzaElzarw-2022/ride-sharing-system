@@ -40,5 +40,6 @@ public interface TripService {
     void endTrip(Long driverId, Long tripId);
 
     TripDto getTrip(Long tripId);
-    List<TripDto> getTripHistory(Long riderId);
+    List<TripDto> getRiderTrips(Long riderId);
+    List<TripDto> getDriverTrips(Long driverId);
 }

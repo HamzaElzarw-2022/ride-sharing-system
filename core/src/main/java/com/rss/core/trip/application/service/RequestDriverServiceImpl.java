@@ -34,6 +34,7 @@ public class RequestDriverServiceImpl implements RequestDriverService {
                 trip.getStartPoint().getY());
 
         if (driverIds.isEmpty()) {
+            System.out.println("[RequestDriverService] No drivers available for trip " + trip.getId());
             return; // No drivers available in range
         }
 

@@ -7,8 +7,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class Consumer {
 
-    @RabbitListener(queues = RabbitConfig.QUEUE_NAME)
-    public void receiveMessage(Map<String, Object> event) {
+    @RabbitListener(queues = RabbitConfig.DRIVER_REQUEST_QUEUE_NAME)
+    public void receiveDriverRequestMessage(Map<String, Object> event) {
         System.out.println("Received: " + event);
+    }
+
+    @RabbitListener(queues = RabbitConfig.TRIP_ENDED_QUEUE_NAME)
+    public void receiveTripEndedMessage(Map<String, Object> event) {
+        System.out.println("Received trip ended: " + event);
     }
 }

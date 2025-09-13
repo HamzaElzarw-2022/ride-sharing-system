@@ -49,8 +49,13 @@ public class TripController {
         return tripService.getTrip(tripId);
     }
 
-    @GetMapping("/history")
-    public List<TripDto> getTripHistory(@CurrentRiderId Long riderId) {
-        return tripService.getTripHistory(riderId);
+    @GetMapping("/rider/history")
+    public List<TripDto> getRiderTrips(@CurrentRiderId Long riderId) {
+        return tripService.getRiderTrips(riderId);
+    }
+
+    @GetMapping("/driver/history")
+    public List<TripDto> getDriverTrips(@CurrentDriverId Long driverId) {
+        return tripService.getDriverTrips(driverId);
     }
 }

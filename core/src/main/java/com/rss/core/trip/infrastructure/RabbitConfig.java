@@ -10,13 +10,20 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitConfig {
 
-    public static final String QUEUE_NAME = "driver.request.queue";
+    public static final String DRIVER_REQUEST_QUEUE_NAME = "driver.request.queue";
+    public static final String TRIP_ENDED_QUEUE_NAME = "trip.ended.queue";
     public static final String EXCHANGE_NAME = "trip.events.exchange";
-    public static final String ROUTING_KEY = "driver.request";
+    public static final String DRIVER_REQUEST_ROUTING_KEY = "driver.request";
+    public static final String TRIP_ENDED_ROUTING_KEY = "trip.ended";
 
     @Bean
-    public Queue queue() {
-        return QueueBuilder.durable(QUEUE_NAME).build();
+    public Queue driverRequestQueue() {
+        return QueueBuilder.durable(DRIVER_REQUEST_QUEUE_NAME).build();
+    }
+
+    @Bean
+    public Queue tripEndedQueue() {
+        return QueueBuilder.durable(TRIP_ENDED_QUEUE_NAME).build();
     }
 
     @Bean
@@ -25,11 +32,19 @@ public class RabbitConfig {
     }
 
     @Bean
-    public Binding binding(Queue queue, DirectExchange exchange) {
+    public Binding driverRequestBinding(Queue driverRequestQueue, DirectExchange exchange) {
         return BindingBuilder
-                .bind(queue)
+                .bind(driverRequestQueue)
                 .to(exchange)
-                .with(ROUTING_KEY);
+                .with(DRIVER_REQUEST_ROUTING_KEY);
+    }
+
+    @Bean
+    public Binding tripEndedBinding(Queue tripEndedQueue, DirectExchange exchange) {
+        return BindingBuilder
+                .bind(tripEndedQueue)
+                .to(exchange)
+                .with(TRIP_ENDED_ROUTING_KEY);
     }
 
     @Bean

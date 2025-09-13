@@ -24,7 +24,7 @@ public class RabbitProducer implements NotificationService {
 
         rabbitTemplate.convertAndSend(
                 RabbitConfig.EXCHANGE_NAME,
-                RabbitConfig.ROUTING_KEY,
+                RabbitConfig.DRIVER_REQUEST_ROUTING_KEY,
                 event
         );
     }
@@ -34,7 +34,22 @@ public class RabbitProducer implements NotificationService {
         if (driverIds == null || driverIds.isEmpty()) return;
 
         for (Long driverId : driverIds) {
+            System.out.println("[RabbitProducer] Notifying driver " + driverId + " for trip " + tripId);
             NotifyDriverRequest(driverId, tripId);
         }
+    }
+
+    @Override
+    public void NotifyRiderTripEnded(Long riderId, Long tripId) {
+        Map<String, Object> event = new HashMap<>();
+        event.put("eventType", "TripEnded");
+        event.put("tripId", tripId);
+        event.put("riderId", riderId);
+
+        rabbitTemplate.convertAndSend(
+                RabbitConfig.EXCHANGE_NAME,
+                RabbitConfig.TRIP_ENDED_ROUTING_KEY,
+                event
+        );
     }
 }
