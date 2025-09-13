@@ -29,3 +29,33 @@ services:
       RABBITMQ_DEFAULT_USER: user
     ports:
       - "5672:5672"
+      - "15672:15672"
+      - "15692:15692"
+  server:
+    build:
+      context: ./core
+      dockerfile: Dockerfile.local
+    image: rideshare-core:latest
+    container_name: rideshare_core
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    ports:
+      - "8080:8080"
+    environment:
+      DATASOURCE_URL: jdbc:postgresql://postgres:5432/database
+      DATASOURCE_USERNAME: user
+      DATASOURCE_PASSWORD: password
+
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: user
+      RABBITMQ_PASSWORD: password
+
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    restart: unless-stopped
