@@ -45,6 +45,7 @@ public class RabbitProducer implements NotificationService {
         event.put("eventType", "TripEnded");
         event.put("tripId", tripId);
         event.put("riderId", riderId);
+        event.put("timestamp", Instant.now().toString());
 
         rabbitTemplate.convertAndSend(
                 RabbitConfig.EXCHANGE_NAME,

@@ -38,6 +38,10 @@ public class CoreApiClient {
                 jwt, Void.class).subscribe();
     }
 
+    public Mono<TripDto> requestTrip(Point start, Point end, String jwt) {
+        return post("/api/trips", new CreateTripRequest(start, end), jwt, TripDto.class);
+    }
+
     public Mono<TripDto> acceptTrip(Long tripId, String jwt) {
         return post("/api/trips/" + tripId + "/accept", jwt, TripDto.class);
     }
