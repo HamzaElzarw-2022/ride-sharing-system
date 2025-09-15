@@ -244,7 +244,7 @@ public class RouteService implements MapInternalApi {
 
     @Override
     public boolean isAtExpectedOrProjection(Point actual, Point expected) {
-        final double TOLERANCE = 10.0;
+        final double TOLERANCE = 3.0;
 
         // Check if actual point close to expected point?
         double directDistance = calculateDistance(actual, expected);

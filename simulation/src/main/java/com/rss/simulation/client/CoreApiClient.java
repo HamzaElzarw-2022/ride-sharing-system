@@ -17,6 +17,10 @@ public class CoreApiClient {
         return post("/api/auth/register/driver", req, null, AuthResponse.class);
     }
 
+    public Mono<AuthResponse> registerRider(RegisterRiderRequest req) {
+        return post("/api/auth/register/rider", req, null, AuthResponse.class);
+    }
+
     public Mono<AuthResponse> authenticate(AuthRequest req) {
         return post("/api/auth/authenticate", req, null, AuthResponse.class);
     }
@@ -32,6 +36,10 @@ public class CoreApiClient {
     public void updateLocation(Point location, double degree, String jwt) {
         post("/api/drivers/location/update?x=" + location.x()+ "&y=" + location.y() + "&degree=" + degree,
                 jwt, Void.class).subscribe();
+    }
+
+    public Mono<TripDto> requestTrip(Point start, Point end, String jwt) {
+        return post("/api/trips", new CreateTripRequest(start, end), jwt, TripDto.class);
     }
 
     public Mono<TripDto> acceptTrip(Long tripId, String jwt) {

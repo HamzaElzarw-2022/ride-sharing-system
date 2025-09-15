@@ -18,7 +18,7 @@ public class DriverAgent implements Agent {
     private final int id;
     private final SimClock clock;
     private final Random rng;
-    private final DriverIdentity identity;
+    private final Identity identity;
     private final AtomicBoolean running = new AtomicBoolean(true);
     private final CoreApiClient coreApiClient;
     private final TripRequestInbox tripRequestInbox;
@@ -36,7 +36,7 @@ public class DriverAgent implements Agent {
     private Point location;
     private double degree;
 
-    public DriverAgent(int id, SimClock clock, Random rng, DriverIdentity identity, CoreApiClient coreApiClient, TripRequestInbox tripRequestInbox) {
+    public DriverAgent(int id, SimClock clock, Random rng, Identity identity, CoreApiClient coreApiClient, TripRequestInbox tripRequestInbox) {
         this.id = id;
         this.clock = clock;
         this.rng = rng;
@@ -58,7 +58,7 @@ public class DriverAgent implements Agent {
                     updateLocation();
                 }
 
-                System.out.println("[DriverAgent] id=" + id + " driverId=" + identity.getDriverId() + "; state=" + state + "; loc=" + location + "; deg=" + degree + (trip != null ? "; tripId=" + trip.id() : ""));
+//                System.out.println("[DriverAgent] id=" + id + " driverId=" + identity.getDriverId() + "; state=" + state + "; loc=" + location + "; deg=" + degree + (trip != null ? "; tripId=" + trip.id() : ""));
                 clock.sleep(Duration.ofMillis(tickTime));
             }
         } catch (InterruptedException e) {

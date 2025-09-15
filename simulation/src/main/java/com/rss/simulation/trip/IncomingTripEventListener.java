@@ -1,8 +1,5 @@
 package com.rss.simulation.trip;
 
-import org.springframework.amqp.rabbit.annotation.Exchange;
-import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -22,11 +19,7 @@ public class IncomingTripEventListener {
         this.inbox = inbox;
     }
 
-    @RabbitListener(bindings = @QueueBinding(
-            value = @Queue(value = QUEUE_NAME, durable = "true"),
-            exchange = @Exchange(value = "trip.events.exchange"),
-            key = "driver.request"
-    ))
+    @RabbitListener(queues = {QUEUE_NAME})
     public void onTripRequest(@Payload Map<String, Object> event) {
         try {
             Object type = event.get("eventType");
@@ -47,7 +40,6 @@ public class IncomingTripEventListener {
             }
 
             inbox.add(driverId, tripId, ts);
-            System.out.println("[IncomingTripEventListener] queued tripId=" + tripId + " for driverId=" + driverId);
         } catch (Exception e) {
             System.out.println("[IncomingTripEventListener] failed to process event: " + e.getMessage());
         }

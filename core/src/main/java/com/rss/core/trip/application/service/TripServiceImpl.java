@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.geo.Point;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -53,6 +54,7 @@ public class TripServiceImpl implements TripService {
     }
 
     @Override
+    @Transactional
     public TripDto acceptTrip(Long driverId, Long tripId) {
         if(tripRepository.existsByDriverIdAndStatusNotIn(driverId,
                 List.of(TripStatus.COMPLETED, TripStatus.CANCELLED, TripStatus.NO_DRIVERS_MATCHED)))
@@ -66,14 +68,19 @@ public class TripServiceImpl implements TripService {
         else if(!requestDriverService.isDriverRequestedForTrip(driverId, tripId))
             throw new IllegalStateException("Driver was not requested for this trip");
 
-        trip.setDriverId(driverId);
-        trip.setStatus(TripStatus.PICKING_UP);
-        tripRepository.save(trip);
+        int updated = tripRepository.acceptTripIfMatching(tripId, driverId);
+        if (updated == 0) {
+            System.out.println("About the same time acceptance resolved!!");
+            throw new IllegalStateException("Trip was already accepted or is no longer in MATCHING state");
+        }
+        // reload latest state
+        Trip updatedTrip = tripRepository.findById(tripId)
+                .orElseThrow(() -> new IllegalArgumentException("Trip not found after update"));
         // remove from matching tracking since it is accepted
         try { tripMatchingTracker.removeMatchingTrip(tripId); } catch (Exception ignored) {}
 
         System.out.println("Driver=" + driverId + ", ACCEPTED trip=" + tripId);
-        return toDto(trip);
+        return toDto(updatedTrip);
     }
 
     @Override
