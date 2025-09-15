@@ -40,7 +40,6 @@ public class RabbitProducer implements NotificationService {
         if (driverIds == null || driverIds.isEmpty()) return;
 
         for (Long driverId : driverIds) {
-            System.out.println("[RabbitProducer] Notifying driver " + driverId + " for trip " + tripId);
             NotifyDriverRequest(driverId, tripId);
         }
     }

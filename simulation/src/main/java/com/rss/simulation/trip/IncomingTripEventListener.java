@@ -40,7 +40,6 @@ public class IncomingTripEventListener {
             }
 
             inbox.add(driverId, tripId, ts);
-            System.out.println("[IncomingTripEventListener] queued tripId=" + tripId + " for driverId=" + driverId);
         } catch (Exception e) {
             System.out.println("[IncomingTripEventListener] failed to process event: " + e.getMessage());
         }

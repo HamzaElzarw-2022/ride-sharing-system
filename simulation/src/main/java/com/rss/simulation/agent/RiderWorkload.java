@@ -16,7 +16,7 @@ public class RiderWorkload implements Runnable {
     private static final double MIN_TRIP_DISTANCE = 150.0;
 
     private static final long MIN_INTERVAL_MS = 1000;   // fastest when many riders are available
-    private static final long MAX_INTERVAL_MS = 10000;  // slowest when few/no riders are available
+    private static final long MAX_INTERVAL_MS = 5000;  // slowest when few/no riders are available
 
     private final SimClock clock;
     private final CoreApiClient coreApiClient;
@@ -48,14 +48,14 @@ public class RiderWorkload implements Runnable {
                         var route = randomStartEndWithMinDistance(MIN_TRIP_DISTANCE);
                         coreApiClient.requestTrip(route[0], route[1], identity.getJwt())
                             .doOnError(err -> {
-                                System.err.println("[RiderWorkload] requestTrip error: " + err.getMessage());
+                                System.err.println("[RiderWorkload] rider=" + riderId + " requestTrip error: " + err.getMessage());
                                 availabilityInbox.markAvailable(riderId); // re-add rider on failure
                             })
                             .subscribe();
-                        System.out.println("[RiderWorkload] rider " + riderId + " requested trip");
+                        System.out.println("[RiderWorkload] rider=" + riderId + " requested trip");
                     }
                 });
-
+                System.out.println("[RiderWorkload] availableRiders=" + availabilityInbox.size() + "; intervalMillis=" + intervalMillis);
                 clock.sleep(Duration.ofMillis(intervalMillis));
             }
         } catch (InterruptedException e) {
