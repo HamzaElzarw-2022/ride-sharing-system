@@ -9,6 +9,7 @@ import com.rss.simulation.client.CoreApiClient;
 import com.rss.simulation.clock.SimClock;
 import com.rss.simulation.scenario.Scenario;
 import com.rss.simulation.trip.TripRequestInbox;
+import com.rss.simulation.trip.RiderAvailabilityInbox;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -21,12 +22,14 @@ public class AgentFactory {
     private final IdentityFactory identityFactory;
     private final CoreApiClient coreApiClient; // Ideally injected
     private final TripRequestInbox tripRequestInbox;
+    private final RiderAvailabilityInbox riderAvailabilityInbox;
 
-    public AgentFactory(IdentityFactory identityFactory, SimClock clock, CoreApiClient coreApiClient, TripRequestInbox tripRequestInbox) {
+    public AgentFactory(IdentityFactory identityFactory, SimClock clock, CoreApiClient coreApiClient, TripRequestInbox tripRequestInbox, RiderAvailabilityInbox riderAvailabilityInbox) {
         this.identityFactory = identityFactory;
         this.clock = clock;
         this.coreApiClient = coreApiClient;
         this.tripRequestInbox = tripRequestInbox;
+        this.riderAvailabilityInbox = riderAvailabilityInbox;
     }
 
     public DriverAgent createDriver(int id, Random rng) {
@@ -40,6 +43,6 @@ public class AgentFactory {
             identities.add(identityFactory.createIdentity(i, Role.RIDER));
         }
 
-        return new RiderWorkload(clock, coreApiClient, identities, rng);
+        return new RiderWorkload(clock, coreApiClient, identities, rng, riderAvailabilityInbox);
     }
 }

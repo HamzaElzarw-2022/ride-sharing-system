@@ -3,14 +3,12 @@ package com.rss.simulation.agent;
 import com.rss.simulation.client.CoreApiClient;
 import com.rss.simulation.client.dto.Point;
 import com.rss.simulation.clock.SimClock;
+import com.rss.simulation.trip.RiderAvailabilityInbox;
 import java.time.Duration;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Random;
 import java.util.stream.Collectors;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 
 public class RiderWorkload implements Runnable {
     private static final double COORD_MIN = 0.0;
@@ -24,15 +22,16 @@ public class RiderWorkload implements Runnable {
     private final CoreApiClient coreApiClient;
     private final Random rng;
     private final Map<Long, Identity> identities;
-    private final Queue<Long> availableRiders = new LinkedList<>();
+    private final RiderAvailabilityInbox availabilityInbox;
     private volatile boolean running = true;
 
-    public RiderWorkload(SimClock clock, CoreApiClient coreApiClient, List<Identity> identities, Random rng) {
+    public RiderWorkload(SimClock clock, CoreApiClient coreApiClient, List<Identity> identities, Random rng, RiderAvailabilityInbox availabilityInbox) {
         this.clock = clock;
         this.coreApiClient = coreApiClient;
         this.rng = rng;
         this.identities = identities.stream().collect(Collectors.toMap(Identity::getRiderId, identity -> identity));
-        this.availableRiders.addAll(this.identities.keySet());
+        this.availabilityInbox = availabilityInbox;
+        this.availabilityInbox.initialize(this.identities.keySet());
         System.out.println("[RiderWorkload] created with " + identities.size() + " identities");
     }
 
@@ -43,22 +42,19 @@ public class RiderWorkload implements Runnable {
             while (running) {
                 long intervalMillis = computeDynamicIntervalMillis();
 
-                if (!availableRiders.isEmpty()) {
-                    Long riderId = availableRiders.poll();
-                    if (riderId != null) {
-                        var identity = identities.get(riderId);
-                        if (identity != null) {
-                            var route = randomStartEndWithMinDistance(MIN_TRIP_DISTANCE);
-                            coreApiClient.requestTrip(route[0], route[1], identity.getJwt())
-                                .doOnError(err -> {
-                                    System.err.println("[RiderWorkload] requestTrip error: " + err.getMessage());
-                                    availableRiders.add(riderId); // re-add rider on failure
-                                })
-                                .subscribe();
-                            System.out.println("[RiderWorkload] rider " + riderId + " requested trip");
-                        }
+                availabilityInbox.poll().ifPresent(riderId -> {
+                    var identity = identities.get(riderId);
+                    if (identity != null) {
+                        var route = randomStartEndWithMinDistance(MIN_TRIP_DISTANCE);
+                        coreApiClient.requestTrip(route[0], route[1], identity.getJwt())
+                            .doOnError(err -> {
+                                System.err.println("[RiderWorkload] requestTrip error: " + err.getMessage());
+                                availabilityInbox.markAvailable(riderId); // re-add rider on failure
+                            })
+                            .subscribe();
+                        System.out.println("[RiderWorkload] rider " + riderId + " requested trip");
                     }
-                }
+                });
 
                 clock.sleep(Duration.ofMillis(intervalMillis));
             }
@@ -69,7 +65,7 @@ public class RiderWorkload implements Runnable {
 
     private long computeDynamicIntervalMillis() {
         int total = identities.size();
-        int available = availableRiders.size();
+        int available = availabilityInbox.size();
         if (total <= 0) return MAX_INTERVAL_MS;
         double ratio = Math.max(0.0, Math.min(1.0, available / (double) total));
         double interval = MAX_INTERVAL_MS - ratio * (MAX_INTERVAL_MS - MIN_INTERVAL_MS);

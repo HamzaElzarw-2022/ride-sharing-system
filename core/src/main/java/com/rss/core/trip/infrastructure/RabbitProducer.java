@@ -5,14 +5,20 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class RabbitProducer implements NotificationService {
     private final RabbitTemplate rabbitTemplate;
+
+    public RabbitProducer(RabbitTemplate rabbitTemplate) {
+        this.rabbitTemplate = rabbitTemplate;
+
+        // force initialize the queues
+        NotifyDriverRequest(0L, 0L);
+        NotifyRiderTripEnded(0L, 0L);
+    }
 
     @Override
     public void NotifyDriverRequest(Long driverId, Long tripId) {
