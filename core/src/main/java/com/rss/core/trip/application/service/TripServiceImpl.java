@@ -8,11 +8,16 @@ import com.rss.core.trip.application.port.in.TripService;
 import com.rss.core.trip.application.port.out.NotificationService;
 import com.rss.core.trip.domain.entity.Trip;
 import com.rss.core.trip.domain.entity.Trip.TripStatus;
+import com.rss.core.trip.domain.event.TripCreatedEvent;
+import com.rss.core.trip.domain.event.TripEndedEvent;
+import com.rss.core.trip.domain.event.TripMatchedEvent;
+import com.rss.core.trip.domain.event.TripStartedEvent;
 import com.rss.core.trip.domain.repository.TripRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.geo.Point;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +32,7 @@ public class TripServiceImpl implements TripService {
     private final RequestDriverService requestDriverService;
     private final TripMatchingTracker tripMatchingTracker;
     private final NotificationService notificationService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public TripDto createTrip(Long riderId, Point start, Point end) {
@@ -49,7 +55,9 @@ public class TripServiceImpl implements TripService {
             tripMatchingTracker.addMatchingTrip(trip.getId(), createdAtMillis);
         } catch (Exception ignored) {}
         requestDriverService.requestDriver(trip);
-        System.out.println("Rider=" + riderId + ", CREATED trip=" + trip.getId());
+        //System.out.println("Rider=" + riderId + ", CREATED trip=" + trip.getId());
+        eventPublisher.publishEvent(new TripCreatedEvent(trip.getId(), trip.getRiderId(),
+                trip.getCreatedAt(), trip.getStartPoint(), trip.getEndPoint()));
         return toDto(trip);
     }
 
@@ -70,7 +78,7 @@ public class TripServiceImpl implements TripService {
 
         int updated = tripRepository.acceptTripIfMatching(tripId, driverId);
         if (updated == 0) {
-            System.out.println("About the same time acceptance resolved!!");
+            //System.out.println("About the same time acceptance resolved!!");
             throw new IllegalStateException("Trip was already accepted or is no longer in MATCHING state");
         }
         // reload latest state
@@ -79,7 +87,8 @@ public class TripServiceImpl implements TripService {
         // remove from matching tracking since it is accepted
         try { tripMatchingTracker.removeMatchingTrip(tripId); } catch (Exception ignored) {}
 
-        System.out.println("Driver=" + driverId + ", ACCEPTED trip=" + tripId);
+        //System.out.println("Driver=" + driverId + ", ACCEPTED trip=" + tripId);
+        eventPublisher.publishEvent(new TripMatchedEvent(updatedTrip.getId(), updatedTrip.getDriverId()));
         return toDto(updatedTrip);
     }
 
@@ -105,7 +114,8 @@ public class TripServiceImpl implements TripService {
         trip.setStartTime(LocalDateTime.now());
         tripRepository.save(trip);
 
-        System.out.println("Driver=" + driverId + ", STARTED trip=" + tripId + ", actual=" + driverLocation + ", expected=" + trip.getStartPoint());
+        //System.out.println("Driver=" + driverId + ", STARTED trip=" + tripId + ", actual=" + driverLocation + ", expected=" + trip.getStartPoint());
+        eventPublisher.publishEvent(new TripStartedEvent(trip.getId(), trip.getStartTime()));
         return toDto(trip);
     }
 
@@ -129,8 +139,10 @@ public class TripServiceImpl implements TripService {
 
         trip.setStatus(TripStatus.COMPLETED);
         trip.setEndTime(LocalDateTime.now());
-        System.out.println("Driver=" + driverId + ", ENDED trip=" + tripId + ", actual=" + driverLocation + ", expected=" + trip.getEndPoint());
         tripRepository.save(trip);
+
+        //System.out.println("Driver=" + driverId + ", ENDED trip=" + tripId + ", actual=" + driverLocation + ", expected=" + trip.getEndPoint());
+        eventPublisher.publishEvent(new TripEndedEvent(trip.getId(), trip.getEndTime()));
         notificationService.NotifyRiderTripEnded(trip.getRiderId(), trip.getId());
     }
 
