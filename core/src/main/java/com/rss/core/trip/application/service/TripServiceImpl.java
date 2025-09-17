@@ -2,6 +2,7 @@ package com.rss.core.trip.application.service;
 
 import com.rss.core.location.LocationInternalApi;
 import com.rss.core.map.MapInternalApi;
+import com.rss.core.trip.api.internal.TripInternalApi;
 import com.rss.core.trip.application.dto.TripDto;
 import com.rss.core.trip.application.port.in.RequestDriverService;
 import com.rss.core.trip.application.port.in.TripService;
@@ -25,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class TripServiceImpl implements TripService {
+public class TripServiceImpl implements TripService, TripInternalApi {
     private final TripRepository tripRepository;
     private final LocationInternalApi locationInternalApi;
     private final MapInternalApi mapInternalApi;
@@ -144,6 +145,17 @@ public class TripServiceImpl implements TripService {
         //System.out.println("Driver=" + driverId + ", ENDED trip=" + tripId + ", actual=" + driverLocation + ", expected=" + trip.getEndPoint());
         eventPublisher.publishEvent(new TripEndedEvent(trip.getId(), trip.getEndTime()));
         notificationService.NotifyRiderTripEnded(trip.getRiderId(), trip.getId());
+    }
+
+    @Override
+    public List<TripDto> getAllActiveTrips() {
+        return tripRepository.findAllByStatusIn(List.of(
+                        TripStatus.MATCHING,
+                        TripStatus.PICKING_UP,
+                        TripStatus.STARTED))
+                .stream()
+                .map(this::toDto)
+                .toList();
     }
 
     @Override

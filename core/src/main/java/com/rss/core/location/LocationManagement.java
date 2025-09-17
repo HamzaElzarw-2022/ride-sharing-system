@@ -1,5 +1,8 @@
 package com.rss.core.location;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Point;
@@ -89,6 +92,46 @@ public class LocationManagement implements LocationService, LocationInternalApi 
         }
         return Set.of();
     }
+
+    @Override
+    public Map<Long, Point> getAllDriverLocations() {
+        // Get all driver IDs
+        Set<String> memberIds = stringRedisTemplate.opsForZSet()
+                .range(DRIVER_LOCATION_KEY, 0, -1);
+
+        if (memberIds == null || memberIds.isEmpty()) {
+            return Map.of();
+        }
+
+        // Get all positions in one call
+        List<Point> positions = stringRedisTemplate.opsForGeo()
+                .position(DRIVER_LOCATION_KEY, memberIds.toArray(String[]::new));
+
+        if (positions == null || positions.isEmpty()) {
+            return Map.of();
+        }
+
+        // Zip IDs + positions
+        Iterator<String> idIterator = memberIds.iterator();
+        Iterator<Point> posIterator = positions.iterator();
+
+        Map<Long, Point> result = new HashMap<>(memberIds.size());
+
+        while (idIterator.hasNext() && posIterator.hasNext()) {
+            String id = idIterator.next();
+            Point geoPoint = posIterator.next();
+            if (geoPoint == null) continue;
+
+            try {
+                result.put(Long.parseLong(id), geoCoordinateMapper.fromRedisPoint(geoPoint));
+            } catch (NumberFormatException ignored) {
+                // skip invalid IDs
+            }
+        }
+
+        return result;
+    }
+
 
     private static String DEGREE_KEY(Long driverId) {
         return DRIVER_DEGREE_KEY + ":" + driverId;

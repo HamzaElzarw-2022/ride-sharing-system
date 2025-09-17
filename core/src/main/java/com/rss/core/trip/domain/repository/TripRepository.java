@@ -25,4 +25,6 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Trip t SET t.driverId = :driverId, t.status = com.rss.core.trip.domain.entity.Trip$TripStatus.PICKING_UP WHERE t.id = :tripId AND t.status = com.rss.core.trip.domain.entity.Trip$TripStatus.MATCHING AND t.driverId IS NULL")
     int acceptTripIfMatching(@Param("tripId") Long tripId, @Param("driverId") Long driverId);
+
+    List<Trip> findAllByStatusIn(List<TripStatus> statuses);
 }
