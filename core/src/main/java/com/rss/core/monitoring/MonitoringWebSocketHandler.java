@@ -1,6 +1,7 @@
 package com.rss.core.monitoring;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rss.core.location.DriverLocation;
 import com.rss.core.location.LocationInternalApi;
 import com.rss.core.trip.domain.event.TripCreatedEvent;
 import com.rss.core.trip.domain.event.TripEndedEvent;
@@ -49,7 +50,7 @@ public class MonitoringWebSocketHandler extends TextWebSocketHandler {
     public void tickDriverLocations() {
         if (sessions.isEmpty()) return;
         try {
-            Map<Long, org.springframework.data.geo.Point> all = locationInternalApi.getAllDriverLocations();
+            Map<Long, DriverLocation> all = locationInternalApi.getAllDriverLocations();
             var payload = Map.of(
                     "type", "driver.locations",
                     "ts", System.currentTimeMillis(),

@@ -94,7 +94,7 @@ public class LocationManagement implements LocationService, LocationInternalApi 
     }
 
     @Override
-    public Map<Long, Point> getAllDriverLocations() {
+    public Map<Long, DriverLocation> getAllDriverLocations() {
         // Get all driver IDs
         Set<String> memberIds = stringRedisTemplate.opsForZSet()
                 .range(DRIVER_LOCATION_KEY, 0, -1);
@@ -115,7 +115,7 @@ public class LocationManagement implements LocationService, LocationInternalApi 
         Iterator<String> idIterator = memberIds.iterator();
         Iterator<Point> posIterator = positions.iterator();
 
-        Map<Long, Point> result = new HashMap<>(memberIds.size());
+        Map<Long, DriverLocation> result = new HashMap<>(memberIds.size());
 
         while (idIterator.hasNext() && posIterator.hasNext()) {
             String id = idIterator.next();
@@ -123,7 +123,11 @@ public class LocationManagement implements LocationService, LocationInternalApi 
             if (geoPoint == null) continue;
 
             try {
-                result.put(Long.parseLong(id), geoCoordinateMapper.fromRedisPoint(geoPoint));
+                Long driverId = Long.parseLong(id);
+                Point mapPoint = geoCoordinateMapper.fromRedisPoint(geoPoint);
+                String d = stringRedisTemplate.opsForValue().get(DEGREE_KEY(driverId));
+                double degree = d == null ? 0.0 : parseDegree(d);
+                result.put(driverId, new DriverLocation(mapPoint.getX(), mapPoint.getY(), degree));
             } catch (NumberFormatException ignored) {
                 // skip invalid IDs
             }

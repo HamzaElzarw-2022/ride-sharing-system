@@ -2,14 +2,13 @@ package com.rss.core.location;
 
 import java.util.Map;
 import java.util.Set;
-import org.springframework.data.geo.Point;
 
 public interface LocationInternalApi {
 
     /**
      * Retrieve driver location in map unit; returns null if absent.
      */
-    Point getDriverLocation(Long driverId);
+    DriverLocation getDriverLocation(Long driverId);
 
     /**
      * Find nearby drivers.
@@ -31,5 +30,5 @@ public interface LocationInternalApi {
    /**
     * Get the locations of all available drivers
     */
-    Map<Long, Point> getAllDriverLocations();
+    Map<Long, DriverLocation> getAllDriverLocations();
 }
