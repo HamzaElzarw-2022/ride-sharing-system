@@ -32,7 +32,24 @@ export async function fetchSnapshot(): Promise<MonitoringSnapshot> {
 
 export type MonitoringMessage =
   | { type: 'driver.locations'; ts: number; drivers: Record<string, DriverLocation> }
-  | { type: 'trip.created' | 'trip.matched' | 'trip.started' | 'trip.ended'; ts: number; payload: any };
+  | { type: 'trip.created' | 'trip.matched' | 'trip.started' | 'trip.ended'; ts: number;
+      payload: {
+        tripId: number;
+        // if type is trip.created
+        riderId?: number | null;
+        startLatitude?: number | null;
+        startLongitude?: number | null;
+        endLatitude?: number | null;
+        endLongitude?: number | null;
+        createdAt?: Date | null;
+        // if type is trip.matched
+        driverId?: number | null;
+        // if type is trip.started
+        startTime?: Date | null;
+        // if type is trip.ended
+        endTime?: Date | null;
+      }
+    };
 
 export function connectMonitoring(onMessage: (msg: MonitoringMessage) => void): WebSocket {
   const url = new URL('ws://localhost:8080/ws/monitoring');

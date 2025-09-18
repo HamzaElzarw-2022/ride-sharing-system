@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Map as MapIcon, Car, Route } from 'lucide-react';
+import Sidebar from './Sidebar';
 
 const navItems = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -34,28 +35,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Secondary sidebar */}
-      <aside className="w-72 border-r border-slate-800 bg-slate-900/60 backdrop-blur-sm hidden md:flex md:flex-col">
-        <div className="p-4 border-b border-slate-800">
-          <h2 className="text-sm font-semibold text-slate-300">Overview</h2>
-          <p className="text-xs text-slate-500">Drivers and Trips</p>
-        </div>
-        <div className="p-4 overflow-auto space-y-6">
-          <section>
-            <h3 className="text-xs uppercase tracking-wider text-slate-500 mb-2">Drivers</h3>
-            <ul className="space-y-2">
-              <li className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">Coming soon...</li>
-              <li className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">Coming soon...</li>
-            </ul>
-          </section>
-          <section>
-            <h3 className="text-xs uppercase tracking-wider text-slate-500 mb-2">Trips</h3>
-            <ul className="space-y-2">
-              <li className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">Coming soon...</li>
-              <li className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">Coming soon...</li>
-            </ul>
-          </section>
-        </div>
-      </aside>
+      <Sidebar />
 
       {/* Main content */}
       <main className="flex-1 flex flex-col">

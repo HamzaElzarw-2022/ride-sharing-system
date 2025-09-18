@@ -67,7 +67,12 @@ public class MonitoringWebSocketHandler extends TextWebSocketHandler {
     @EventListener
     public void onTripCreated(TripCreatedEvent e) { sendTripEvent("trip.created", Map.of(
             "tripId", e.id(),
-            "riderId", e.riderId()
+            "riderId", e.riderId(),
+            "startLatitude", e.start().getX(),
+            "startLongitude", e.start().getY(),
+            "endLatitude", e.end().getX(),
+            "endLongitude", e.end().getY(),
+            "createdAt", e.createdAt().toString()
     )); }
 
     @EventListener
@@ -78,7 +83,8 @@ public class MonitoringWebSocketHandler extends TextWebSocketHandler {
 
     @EventListener
     public void onTripStarted(TripStartedEvent e) { sendTripEvent("trip.started", Map.of(
-            "tripId", e.id()
+            "tripId", e.id(),
+            "startTime", e.startTime().toString()
     )); }
 
     @EventListener

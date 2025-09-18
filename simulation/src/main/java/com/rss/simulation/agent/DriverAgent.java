@@ -82,7 +82,7 @@ public class DriverAgent implements Agent {
         double distanceToTarget = Math.hypot(dx, dy);
 
         degree = Math.toDegrees(Math.atan2(dy, dx));
-        double speed = target.speed();
+        double speed = 10;
         if (state == State.IDLE) {
             speed = speed * idleSpeedFactor;
         }
