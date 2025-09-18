@@ -107,8 +107,8 @@ public class RouteService implements MapInternalApi {
 
                 // Calculate new g-score
                 double edgeDistance = calculateDistance(
-                        current.node.getLatitude(), current.node.getLongitude(),
-                        neighbor.getLatitude(), neighbor.getLongitude()
+                        current.node.getX(), current.node.getY(),
+                        neighbor.getX(), neighbor.getY()
                 );
 
                 double tentativeGScore = gScore.get(current.node.getId()) + edgeDistance;
@@ -158,8 +158,8 @@ public class RouteService implements MapInternalApi {
                 }
 
                 routeSteps.add(RouteStep.builder()
-                        .x(node.getLatitude())
-                        .y(node.getLongitude())
+                        .x(node.getX())
+                        .y(node.getY())
                         .speed(speed)
                         .instruction(instruction)
                         .build());
@@ -175,8 +175,8 @@ public class RouteService implements MapInternalApi {
         } else {
             // No path found
             routeSteps.add(RouteStep.builder()
-                    .x(startNode.getLatitude())
-                    .y(startNode.getLongitude())
+                    .x(startNode.getX())
+                    .y(startNode.getY())
                     .speed(currentSpeed)
                     .instruction("No route found")
                     .build());
@@ -187,7 +187,7 @@ public class RouteService implements MapInternalApi {
 
     private double calculateHeuristic(Node node, Point targetPoint) {
         return calculateDistance(
-                node.getLatitude(), node.getLongitude(),
+                node.getX(), node.getY(),
                 targetPoint.getX(), targetPoint.getY()
         );
     }
@@ -261,8 +261,8 @@ public class RouteService implements MapInternalApi {
     }
 
     public EdgeProjectionPoint getProjectionPoint(Point point, Edge edge) {
-        double x1 = edge.getStartNode().getLatitude(), y1 = edge.getStartNode().getLongitude();
-        double x2 = edge.getEndNode().getLatitude(), y2 = edge.getEndNode().getLongitude();
+        double x1 = edge.getStartNode().getX(), y1 = edge.getStartNode().getY();
+        double x2 = edge.getEndNode().getX(), y2 = edge.getEndNode().getY();
 
         // Edge vector
         double dx = x2 - x1;

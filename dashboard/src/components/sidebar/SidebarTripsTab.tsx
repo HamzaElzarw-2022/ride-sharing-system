@@ -33,7 +33,7 @@ export default function SidebarTripsTab({ onOpenTrip }: { onOpenTrip: (tripId: n
               {t.driverId != null && (
                 <div className="flex items-center gap-2"><Car size={12} className="text-emerald-300"/><span>Driver #{t.driverId}</span></div>
               )}
-              <div className="flex items-center gap-2"><MapPin size={12} className="text-sky-300"/><span>({t.startLongitude.toFixed(1)}, {t.startLatitude.toFixed(1)}) → ({t.endLongitude.toFixed(1)}, {t.endLatitude.toFixed(1)})</span></div>
+              <div className="flex items-center gap-2"><MapPin size={12} className="text-sky-300"/><span>({t.startX.toFixed(1)}, {t.startY.toFixed(1)}) → ({t.destX.toFixed(1)}, {t.destY.toFixed(1)})</span></div>
             </div>
           </li>
         ))}

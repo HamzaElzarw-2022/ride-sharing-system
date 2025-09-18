@@ -118,7 +118,7 @@ export default function TripLayer({ canvasRef, trips, routes, zoom, offset }: {
     <>
       {/* Matching trips: only user icon at start point */}
       {trips.filter(t => t.status === 'MATCHING').map(t => {
-        const sp = worldToScreen({ x: t.startLongitude, y: t.startLatitude }, zoom, offset);
+        const sp = worldToScreen({ x: t.startX, y: t.startY }, zoom, offset);
         return (
           <div key={`match-${t.id}`} className="absolute" style={{ left: sp.x - 8, top: sp.y - 8 }}>
             <User size={16} className="text-yellow-300 drop-shadow" />

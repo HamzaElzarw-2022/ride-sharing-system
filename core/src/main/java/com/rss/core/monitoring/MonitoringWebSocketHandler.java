@@ -68,10 +68,10 @@ public class MonitoringWebSocketHandler extends TextWebSocketHandler {
     public void onTripCreated(TripCreatedEvent e) { sendTripEvent("trip.created", Map.of(
             "tripId", e.id(),
             "riderId", e.riderId(),
-            "startLatitude", e.start().getX(),
-            "startLongitude", e.start().getY(),
-            "endLatitude", e.end().getX(),
-            "endLongitude", e.end().getY(),
+            "startX", e.start().getX(),
+            "startY", e.start().getY(),
+            "destX", e.end().getX(),
+            "destY", e.end().getY(),
             "createdAt", e.createdAt().toString()
     )); }
 

@@ -17,8 +17,8 @@ public class Node {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long longitude;
-    private Long latitude;
+    private Long x;
+    private Long y;
     private String name;
 
     @OneToMany(mappedBy = "startNode", cascade = CascadeType.ALL, orphanRemoval = true)

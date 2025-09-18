@@ -15,7 +15,7 @@ export default function Sidebar({ activeTab, onChangeTab }: { activeTab: Sidebar
   }
 
   return (
-    <aside className="w-80 border-r border-slate-800 bg-slate-900/60 backdrop-blur-sm hidden md:flex md:flex-col">
+    <aside className="w-80 border-r border-slate-800 bg-slate-900/60 backdrop-blur-sm hidden md:flex md:flex-col max-h-screen">
       <div className="px-3 py-3 border-b bg-slate-950 border-slate-800 flex items-center gap-2">
         <h1 className="text-md h-10 font-semibold text-slate-300 pt-2.5">
           Ride Sharing Dashboard

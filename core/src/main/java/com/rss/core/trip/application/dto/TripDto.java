@@ -19,12 +19,12 @@ public class TripDto {
     private Long driverId;
 
     // Start point coordinates
-    private Double startLatitude;
-    private Double startLongitude;
+    private Double startX;
+    private Double startY;
 
     // End point coordinates
-    private Double endLatitude;
-    private Double endLongitude;
+    private Double destX;
+    private Double destY;
 
     private LocalDateTime createdAt;
     private LocalDateTime startTime;

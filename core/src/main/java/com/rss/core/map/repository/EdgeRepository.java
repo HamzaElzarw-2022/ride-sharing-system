@@ -11,18 +11,18 @@ public interface EdgeRepository extends JpaRepository<Edge, Long> {
 
     @Query(value = """
     SELECT e.id, e.start_node_id, e.end_node_id, e.speed, e.name, e.direction,
-           n1.latitude AS start_node_latitude, n1.longitude AS start_node_longitude,
-           n2.latitude AS end_node_latitude, n2.longitude AS end_node_longitude
+           n1.x AS start_node_x, n1.y AS start_node_y,
+           n2.x AS end_node_x, n2.y AS end_node_y
     FROM edges e
     JOIN nodes n1 ON e.start_node_id = n1.id
     JOIN nodes n2 ON e.end_node_id = n2.id
     WHERE
-        (n1.latitude BETWEEN :lat - :range AND :lat + :range
-        AND n1.longitude BETWEEN :lon - :range AND :lon + :range)
-        OR (n2.latitude BETWEEN :lat - :range AND :lat + :range
-        AND n2.longitude BETWEEN :lon - :range AND :lon + :range)
+        (n1.x BETWEEN :x - :range AND :x + :range
+        AND n1.y BETWEEN :y - :range AND :y + :range)
+        OR (n2.x BETWEEN :x - :range AND :x + :range
+        AND n2.y BETWEEN :y - :range AND :y + :range)
     """, nativeQuery = true)
-    List<Edge> findEdgesInBoundingBox(@Param("lat") double lat,
-                                      @Param("lon") double lon,
+    List<Edge> findEdgesInBoundingBox(@Param("x") double x,
+                                      @Param("y") double y,
                                       @Param("range") double range);
 }

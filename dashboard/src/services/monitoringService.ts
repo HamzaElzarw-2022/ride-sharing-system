@@ -7,10 +7,10 @@ export interface TripDto {
   status: TripStatus;
   riderId: number;
   driverId?: number | null;
-  startLatitude: number;  // y in map units
-  startLongitude: number; // x in map units
-  endLatitude: number;    // y in map units
-  endLongitude: number;   // x in map units
+  startX: number;
+  startY: number;
+  destX: number;
+  destY: number;
   // other fields omitted
 }
 
@@ -37,10 +37,10 @@ export type MonitoringMessage =
         tripId: number;
         // if type is trip.created
         riderId?: number | null;
-        startLatitude?: number | null;
-        startLongitude?: number | null;
-        endLatitude?: number | null;
-        endLongitude?: number | null;
+        startY?: number | null;
+        startX?: number | null;
+        destY?: number | null;
+        destX?: number | null;
         createdAt?: Date | null;
         // if type is trip.matched
         driverId?: number | null;

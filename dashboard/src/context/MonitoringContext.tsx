@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { connectMonitoring, fetchSnapshot, type MonitoringMessage, type TripDto, type DriverLocation } from '../services/monitoringService';
 import { fetchRoute, type RouteRequest, type RouteResponse } from '../services/routeService';
 
@@ -59,13 +59,13 @@ export function MonitoringProvider({ children }: { children: React.ReactNode }) 
           status: 'MATCHING',
           riderId: (p.riderId ?? 0) as number,
           driverId: null,
-          startLatitude: (p.startLatitude ?? 0) as number,
-          startLongitude: (p.startLongitude ?? 0) as number,
-          endLatitude: (p.endLatitude ?? 0) as number,
-          endLongitude: (p.endLongitude ?? 0) as number,
+          startY: (p.startY ?? 0) as number,
+          startX: (p.startX ?? 0) as number,
+          destY: (p.destY ?? 0) as number,
+          destX: (p.destX ?? 0) as number,
         };
         setTrips((prev) => (prev.some(t => t.id === newTrip.id) ? prev : [...prev, newTrip]));
-        fetchRouteForTrip({ id: newTrip.id, startLongitude: newTrip.startLongitude, startLatitude: newTrip.startLatitude, endLongitude: newTrip.endLongitude, endLatitude: newTrip.endLatitude });
+        fetchRouteForTrip({ id: newTrip.id, startLongitude: newTrip.startX, startLatitude: newTrip.startY, endLongitude: newTrip.destX, endLatitude: newTrip.destY });
         pushEvent(msg);
         break;
       }
@@ -117,7 +117,7 @@ export function MonitoringProvider({ children }: { children: React.ReactNode }) 
 
   function fetchRoutesForTrips(list: TripDto[]) {
     if (!list || !list.length) return;
-    Promise.allSettled(list.map(t => fetchRouteForTrip({ id: t.id, startLongitude: t.startLongitude, startLatitude: t.startLatitude, endLongitude: t.endLongitude, endLatitude: t.endLatitude }))).then(() => {});
+    Promise.allSettled(list.map(t => fetchRouteForTrip({ id: t.id, startLongitude: t.startX, startLatitude: t.startY, endLongitude: t.destX, endLatitude: t.destY }))).then(() => {});
   }
 
   const value = useMemo<MonitoringContextType>(() => ({ trips, drivers, routes, events, selectedTripId, setSelectedTripId }), [trips, drivers, routes, events, selectedTripId]);
