@@ -125,8 +125,8 @@ public class MapService {
 
             var node = Node.builder()
                     .name(jsonNode.get("name").asText())
-                    .latitude(normX)
-                    .longitude(normY)
+                    .x(normX)
+                    .y(normY)
                     .build();
             tempNodes.put(jsonNode.get("id").asInt(), node);
         }
@@ -166,8 +166,8 @@ public class MapService {
                     Map<String, Object> m = new LinkedHashMap<>();
                     m.put("id", n.getId());
                     m.put("name", n.getName());
-                    m.put("x", n.getLatitude());
-                    m.put("y", n.getLongitude());
+                    m.put("x", n.getX());
+                    m.put("y", n.getY());
                     return m;
                 }).collect(Collectors.toList());
 
