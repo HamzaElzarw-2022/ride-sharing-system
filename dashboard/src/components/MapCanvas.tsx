@@ -184,7 +184,7 @@ export default function MapCanvas() {
       canvasRef={canvasRef}
     >
       <TripLayer canvasRef={canvasRef} trips={trips} routes={routes} zoom={zoom} offset={offset} />
-      <DriversLayer drivers={drivers} trips={trips} zoom={zoom} offset={offset} />
+      <DriversLayer drivers={drivers} trips={trips} zoom={zoom} offset={offset} dragging={dragging} />
       <div className="absolute top-3 left-3 bg-black/40 text-white text-xs px-2 py-1 rounded-full backdrop-blur border border-white/10">Map</div>
       <div className="absolute bottom-3 right-3 flex gap-2">
         <button className="px-2 py-1 rounded bg-white/10 text-white border border-white/20 hover:bg-white/20" onClick={() => setZoom((z) => Math.min(5, z * 1.2))}>+</button>
