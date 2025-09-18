@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Map as MapIcon, Car, Route, ListOrdered, MapPinned } from 'lucide-react';
+import { LayoutDashboard, ListOrdered, MapPinned, Car } from 'lucide-react';
 import Sidebar, { type SidebarActiveTab } from './Sidebar';
 import { MonitoringProvider } from '../context/MonitoringContext';
 
@@ -49,6 +49,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             title="Show Trips"
           >
             <MapPinned size={22} />
+          </button>
+          <button
+            className={`p-2 rounded-lg transition-colors border ${sidebarTab === 'drivers' ? 'bg-slate-800 text-white border-slate-600' : 'bg-transparent text-slate-300 border-slate-700 hover:bg-slate-800/50'}`}
+            onClick={() => setSidebarTab('drivers')}
+            title="Show Drivers"
+          >
+            <Car size={22} />
           </button>
         </aside>
 

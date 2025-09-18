@@ -1,9 +1,10 @@
 import SidebarEventsTab from './sidebar/SidebarEventsTab';
 import SidebarTripsTab from './sidebar/SidebarTripsTab';
 import SidebarTripDetailsTab from './sidebar/SidebarTripDetailsTab';
+import SidebarDriversTab from './sidebar/SidebarDriversTab';
 import { useMonitoring } from '../context/MonitoringContext';
 
-export type SidebarActiveTab = 'events' | 'trips' | 'tripDetails';
+export type SidebarActiveTab = 'events' | 'trips' | 'tripDetails' | 'drivers';
 
 export default function Sidebar({ activeTab, onChangeTab }: { activeTab: SidebarActiveTab; onChangeTab: (tab: SidebarActiveTab) => void; }) {
   const { setSelectedTripId } = useMonitoring();
@@ -22,7 +23,7 @@ export default function Sidebar({ activeTab, onChangeTab }: { activeTab: Sidebar
       </div>
       <div className="p-4 h-10 border-b border-slate-800 flex items-center gap-2">
         <h2 className="text-sm font-semibold text-slate-300">
-          {activeTab === 'events' ? 'Live Events' : activeTab === 'trips' ? 'Trips' : 'Trip Details'}
+          {activeTab === 'events' ? 'Live Events' : activeTab === 'trips' ? 'Trips' : activeTab === 'drivers' ? 'Drivers' : 'Trip Details'}
         </h2>
         {activeTab === 'tripDetails' && (
           <button onClick={() => onChangeTab('trips')} className="ml-auto text-xs text-slate-400 hover:text-white">Back to trips</button>
@@ -30,6 +31,7 @@ export default function Sidebar({ activeTab, onChangeTab }: { activeTab: Sidebar
       </div>
       {activeTab === 'events' && <SidebarEventsTab />}
       {activeTab === 'trips' && <SidebarTripsTab onOpenTrip={handleOpenTrip} />}
+      {activeTab === 'drivers' && <SidebarDriversTab />}
       {activeTab === 'tripDetails' && <SidebarTripDetailsTab onBack={() => onChangeTab('trips')} />}
     </aside>
   );
