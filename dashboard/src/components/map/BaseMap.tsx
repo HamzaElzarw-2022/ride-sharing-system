@@ -107,6 +107,8 @@ export default function BaseMap(props: BaseMapProps) {
     } else {
       ctx.fillStyle = BG; ctx.fillRect(0, 0, size.x, size.y);
     }
+    // notify listeners that BaseMap finished rendering
+    try { window.dispatchEvent(new CustomEvent('basemap-rendered')); } catch {}
   }
 
   useEffect(() => { render(); }, [data, zoom, offset]);

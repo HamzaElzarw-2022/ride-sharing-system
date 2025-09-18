@@ -1,19 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
 import BaseMap, { fitView, type Vec2 } from './map/BaseMap';
-import TripMarkersLayer from './map/TripMarkersLayer';
+import TripLayer from './map/TripLayer';
 import DriversLayer from './map/DriversLayer';
-import RoutesLayer from './map/RoutesLayer';
 import { fetchMap } from '../services/mapService';
 import type { MapData } from '../services/mapService';
 import {fetchSnapshot, connectMonitoring, type MonitoringMessage} from '../services/monitoringService';
 import type { TripDto, DriverLocation } from '../services/monitoringService';
-import type { RouteResponse } from '../services/routeService';
+import type { RouteResponse, RouteRequest } from '../services/routeService';
+import { fetchRoute } from '../services/routeService';
 
 export default function MapCanvas() {
   // Monitoring state
   const [drivers, setDrivers] = useState<Record<string, DriverLocation>>({});
   const [trips, setTrips] = useState<TripDto[]>([]);
-  const routeCache = useRef<Map<number, RouteResponse>>(new Map());
+  const [routes, setRoutes] = useState<Map<number, RouteResponse>>(new Map());
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [data, setData] = useState<MapData | null>(null);
   const [zoom, setZoom] = useState(1);
@@ -41,12 +41,35 @@ export default function MapCanvas() {
   useEffect(() => {
     let ws: WebSocket | null = null;
     fetchSnapshot().then((snap) => {
-      setTrips(snap.trips || []);
+      const initTrips = snap.trips || [];
+      setTrips(initTrips);
       setDrivers(snap.drivers || {});
+      // Fetch routes for all trips on initial snapshot
+      fetchRoutesForTrips(initTrips);
     }).catch(() => {});
     ws = connectMonitoring(onMessage);
     return () => { if (ws) try { ws.close(); } catch {} };
   }, []);
+
+  async function fetchRouteForTrip(trip: { id: number; startLongitude: number; startLatitude: number; endLongitude: number; endLatitude: number; }) {
+    try {
+      const req: RouteRequest = {
+        startPoint: { x: trip.startLongitude, y: trip.startLatitude },
+        destinationPoint: { x: trip.endLongitude, y: trip.endLatitude },
+      };
+      const r = await fetchRoute(req);
+      setRoutes((prev) => {
+        const m = new Map(prev);
+        m.set(trip.id, r);
+        return m;
+      });
+    } catch {}
+  }
+
+  function fetchRoutesForTrips(list: TripDto[]) {
+    if (!list || !list.length) return;
+    Promise.allSettled(list.map(t => fetchRouteForTrip(t))).then(() => {});
+  }
 
   function onMessage(msg: MonitoringMessage) {
     switch (msg.type) {
@@ -57,20 +80,27 @@ export default function MapCanvas() {
       case 'trip.created': {
         const p = msg.payload;
         if (!p) break;
+        const newTrip: TripDto = {
+          id: p.tripId,
+          status: 'MATCHING',
+          riderId: (p.riderId ?? 0) as number,
+          driverId: null,
+          startLatitude: (p.startLatitude ?? 0) as number,
+          startLongitude: (p.startLongitude ?? 0) as number,
+          endLatitude: (p.endLatitude ?? 0) as number,
+          endLongitude: (p.endLongitude ?? 0) as number,
+        };
         setTrips((prev) => {
-          // Avoid duplicates if trip already exists
-          if (prev.some(t => t.id === p.tripId)) return prev;
-          const newTrip: TripDto = {
-            id: p.tripId,
-            status: 'MATCHING',
-            riderId: (p.riderId ?? 0) as number,
-            driverId: null,
-            startLatitude: (p.startLatitude ?? 0) as number,
-            startLongitude: (p.startLongitude ?? 0) as number,
-            endLatitude: (p.endLatitude ?? 0) as number,
-            endLongitude: (p.endLongitude ?? 0) as number,
-          };
+          if (prev.some(t => t.id === newTrip.id)) return prev;
           return [...prev, newTrip];
+        });
+        // Fetch route for the newly created trip
+        fetchRouteForTrip({
+          id: newTrip.id,
+          startLongitude: newTrip.startLongitude,
+          startLatitude: newTrip.startLatitude,
+          endLongitude: newTrip.endLongitude,
+          endLatitude: newTrip.endLatitude,
         });
         break;
       }
@@ -103,12 +133,22 @@ export default function MapCanvas() {
         if (!p) break;
         const endedId = p.tripId;
         setTrips((prev) => prev.filter((t) => t.id !== endedId));
-        // Clear any cached route for the ended trip
-        routeCache.current.delete(endedId);
+        // Remove route for the ended trip
+        setRoutes((prev) => {
+          const m = new Map(prev);
+          m.delete(endedId);
+          return m;
+        });
         break;
       }
     }
   }
+
+  // Force background redraw when routes change (to clear removed routes from canvas)
+  useEffect(() => {
+    // trigger BaseMap useEffect by changing offset reference without changing values
+    setOffset((o) => ({ x: o.x, y: o.y }));
+  }, [routes]);
 
   // Interactions (zoom/pan)
   function onWheel(e: React.WheelEvent) {
@@ -143,8 +183,7 @@ export default function MapCanvas() {
       onMouseLeave={onMouseLeave}
       canvasRef={canvasRef}
     >
-      <RoutesLayer canvasRef={canvasRef} trips={trips} drivers={drivers} zoom={zoom} offset={offset} routeCache={routeCache as any} />
-      <TripMarkersLayer trips={trips} zoom={zoom} offset={offset} />
+      <TripLayer canvasRef={canvasRef} trips={trips} routes={routes} zoom={zoom} offset={offset} />
       <DriversLayer drivers={drivers} trips={trips} zoom={zoom} offset={offset} />
       <div className="absolute top-3 left-3 bg-black/40 text-white text-xs px-2 py-1 rounded-full backdrop-blur border border-white/10">Map</div>
       <div className="absolute bottom-3 right-3 flex gap-2">
