@@ -27,7 +27,11 @@ public class RouteService implements MapInternalApi {
 
         EdgeProjectionPoint startProjection= findClosestEdge(request.getStartPoint());
         EdgeProjectionPoint destinationProjection = findClosestEdge(request.getDestinationPoint());
-        List<RouteStep> route = searchRoute(startProjection.getEdge().getSpeed(), startProjection.getEdge().getEndNodeId(), destinationProjection);
+        List<RouteStep> route = searchRoute(
+                startProjection.getEdge().getSpeed(),
+                startProjection.getEdge().getStartNodeId(),
+                startProjection.getEdge().getEndNodeId(),
+                destinationProjection);
 
         return RouteResponse.builder()
                 .startPointProjection(startProjection)
@@ -37,21 +41,16 @@ public class RouteService implements MapInternalApi {
     }
 
     public RouteResponse getSimRoute(SimRouteRequest request) {
-
-        EdgeProjectionPoint destinationProjection = findClosestEdge(request.getDestinationPoint());
-        List<RouteStep> route = searchRoute(request.getCurrentSpeed(), request.getNodeDirectedTo(), destinationProjection);
-
-        return RouteResponse.builder()
-                .destinationPointProjection(destinationProjection)
-                .route(route)
-                .build();
+        // TODO: remove this method and use getRoute instead
+        return null;
     }
 
-    private List<RouteStep> searchRoute(int currentSpeed, Long nodeId, EdgeProjectionPoint destinationPoint) {
+    private List<RouteStep> searchRoute(int currentSpeed, Long startNodeId, Long endNodeId, EdgeProjectionPoint destinationPoint) {
         List<RouteStep> routeSteps = new ArrayList<>();
 
-        // Retrieve start node and target edge, nodes, and coordinate
-        Node startNode = nodeRepository.findById(nodeId).orElseThrow();
+        // Retrieve both possible start nodes and target info
+        Node startNodeA = nodeRepository.findById(startNodeId).orElseThrow();
+        Node startNodeB = nodeRepository.findById(endNodeId).orElseThrow();
         Edge targetEdge = edgeRepository.findById(destinationPoint.getEdge().getId()).orElseThrow();
         Set<Long> targetNodeIds = Set.of(targetEdge.getStartNode().getId(), targetEdge.getEndNode().getId());
         Point targetCoordinate = destinationPoint.getProjectionPoint();
@@ -62,9 +61,13 @@ public class RouteService implements MapInternalApi {
         Map<Long, NodeWithParent> cameFrom = new HashMap<>();
         Set<Long> closedSet = new HashSet<>();
 
-        // Initialize with start node
-        gScore.put(startNode.getId(), 0.0);
-        openSet.add(new NodeWithScore(startNode, 0.0, calculateHeuristic(startNode, targetCoordinate)));
+        // Initialize with both potential start nodes (multi-source)
+        gScore.put(startNodeA.getId(), 0.0);
+        gScore.put(startNodeB.getId(), 0.0);
+        openSet.add(new NodeWithScore(startNodeA, 0.0, calculateHeuristic(startNodeA, targetCoordinate)));
+        if (!startNodeB.getId().equals(startNodeA.getId())) {
+            openSet.add(new NodeWithScore(startNodeB, 0.0, calculateHeuristic(startNodeB, targetCoordinate)));
+        }
 
         Node goalNode = null;
 
@@ -139,8 +142,26 @@ public class RouteService implements MapInternalApi {
                 current = parent.node;
             }
 
-            // Add the start node
-            pathNodes.addFirst(startNode);
+            // current is now the starting node selected by A*
+            Node chosenStart = current;
+            pathNodes.addFirst(chosenStart);
+
+            // If the first two nodes are the two ends of the same initial edge (back-and-forth), trim the first node
+            if (pathNodes.size() >= 2) {
+                Node n0 = pathNodes.get(0);
+                Node n1 = pathNodes.get(1);
+                // If there is an edge in pathEdges that connects n0 and n1 and also both n0 and n1 are exactly the provided start edge ends
+                boolean areEndsOfStartEdge =
+                        (n0.getId().equals(startNodeId) && n1.getId().equals(endNodeId)) ||
+                        (n0.getId().equals(endNodeId) && n1.getId().equals(startNodeId));
+                if (areEndsOfStartEdge) {
+                    // remove n0 and its edge to n1 so we start directly at n1
+                    pathNodes.remove(0);
+                    if (!pathEdges.isEmpty()) {
+                        pathEdges.remove(0);
+                    }
+                }
+            }
 
             // Create RouteSteps for each node in the path
             for (int i = 0; i < pathNodes.size(); i++) {
@@ -173,10 +194,10 @@ public class RouteService implements MapInternalApi {
                     .instruction("Arrive at destination")
                     .build());
         } else {
-            // No path found
+            // No path found - return one of the start nodes (A)
             routeSteps.add(RouteStep.builder()
-                    .x(startNode.getX())
-                    .y(startNode.getY())
+                    .x(startNodeA.getX())
+                    .y(startNodeA.getY())
                     .speed(currentSpeed)
                     .instruction("No route found")
                     .build());
