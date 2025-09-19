@@ -59,3 +59,28 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
     restart: unless-stopped
+
+  simulation:
+    build:
+      context: ./simulation
+      dockerfile: Dockerfile.local
+    image: rideshare-simulation:latest
+    container_name: rideshare_simulation
+    depends_on:
+      server:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    environment:
+      core.base-url: http://server:8080
+      spring.rabbitmq.host: rabbitmq
+      spring.rabbitmq.port: 5672
+      spring.rabbitmq.username: user
+      spring.rabbitmq.password: password
+      sim.driver-count: 3
+      sim.rider-count: 1
+      sim.duration-seconds: 1000
+      sim.time-factor: 1.0
+      sim.seed: 42
+      simulation.request.ttl-seconds: 30
+    restart: on-failure:3
