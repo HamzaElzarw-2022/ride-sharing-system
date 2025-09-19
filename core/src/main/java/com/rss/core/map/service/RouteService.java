@@ -163,6 +163,41 @@ public class RouteService implements MapInternalApi {
                 }
             }
 
+            // If the last traversed edge is the target edge and we ended at the far end beyond the projection,
+            // trim the last node to avoid overshooting then backtracking to the projection point.
+            if (!pathEdges.isEmpty()) {
+                Edge lastEdge = pathEdges.get(pathEdges.size() - 1);
+                if (lastEdge.getId().equals(targetEdge.getId())) {
+                    // Determine which end of the target edge is closer to the projection
+                    double x1 = lastEdge.getStartNode().getX();
+                    double y1 = lastEdge.getStartNode().getY();
+                    double x2 = lastEdge.getEndNode().getX();
+                    double y2 = lastEdge.getEndNode().getY();
+                    double dx = x2 - x1;
+                    double dy = y2 - y1;
+                    double len2 = dx * dx + dy * dy;
+                    double t;
+                    if (len2 == 0) {
+                        t = 0.0; // degenerate edge safeguard
+                    } else {
+                        t = (((targetCoordinate.getX() - x1) * dx + (targetCoordinate.getY() - y1) * dy) / len2);
+                    }
+                    // Clamp t to [0,1]
+                    t = Math.max(0, Math.min(1, t));
+                    // If t < 0.5 the nearer end to projection is start; otherwise end
+                    Node nearerEnd = (t < 0.5) ? lastEdge.getStartNode() : lastEdge.getEndNode();
+                    // The path currently ends at pathNodes.get(pathNodes.size()-1). If that is not the nearer end, we overshot.
+                    if (!pathNodes.isEmpty()) {
+                        Node pathEnd = pathNodes.get(pathNodes.size() - 1);
+                        if (!pathEnd.getId().equals(nearerEnd.getId())) {
+                            // Remove the overshooting final node and its edge so we stop at the nearer end
+                            pathNodes.remove(pathNodes.size() - 1);
+                            pathEdges.remove(pathEdges.size() - 1);
+                        }
+                    }
+                }
+            }
+
             // Create RouteSteps for each node in the path
             for (int i = 0; i < pathNodes.size(); i++) {
                 Node node = pathNodes.get(i);
