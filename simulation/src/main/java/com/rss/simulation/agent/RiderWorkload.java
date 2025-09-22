@@ -3,7 +3,9 @@ package com.rss.simulation.agent;
 import com.rss.simulation.client.CoreApiClient;
 import com.rss.simulation.client.dto.Point;
 import com.rss.simulation.clock.SimClock;
+import com.rss.simulation.scenario.Scenario;
 import com.rss.simulation.trip.RiderAvailabilityInbox;
+
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -11,9 +13,10 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 public class RiderWorkload implements Runnable {
-    private static final double COORD_MIN = 0.0;
-    private static final double COORD_MAX = 500.0;
-    private static final double MIN_TRIP_DISTANCE = 150.0;
+
+    private final double X_COORD_MAX;
+    private final double Y_COORD_MAX;
+    private final double MIN_TRIP_DISTANCE;
 
     private static final long MIN_INTERVAL_MS = 1000;   // fastest when many riders are available
     private static final long MAX_INTERVAL_MS = 5000;  // slowest when few/no riders are available
@@ -25,13 +28,21 @@ public class RiderWorkload implements Runnable {
     private final RiderAvailabilityInbox availabilityInbox;
     private volatile boolean running = true;
 
-    public RiderWorkload(SimClock clock, CoreApiClient coreApiClient, List<Identity> identities, Random rng, RiderAvailabilityInbox availabilityInbox) {
+    public RiderWorkload(SimClock clock,
+                         CoreApiClient coreApiClient,
+                         List<Identity> identities,
+                         Random rng,
+                         RiderAvailabilityInbox availabilityInbox,
+                         Scenario scenario) {
         this.clock = clock;
         this.coreApiClient = coreApiClient;
         this.rng = rng;
         this.identities = identities.stream().collect(Collectors.toMap(Identity::getRiderId, identity -> identity));
         this.availabilityInbox = availabilityInbox;
         this.availabilityInbox.initialize(this.identities.keySet());
+        this.X_COORD_MAX = scenario.getMap().getMaxX();
+        this.Y_COORD_MAX = scenario.getMap().getMaxY();
+        this.MIN_TRIP_DISTANCE = scenario.getTrip().getMinDistance();
         System.out.println("[RiderWorkload] created with " + identities.size() + " identities");
     }
 
@@ -73,25 +84,25 @@ public class RiderWorkload implements Runnable {
     }
 
     private Point[] randomStartEndWithMinDistance(double minDist) {
-        Point start = randomPoint(COORD_MIN, COORD_MAX);
-        Point end = randomPoint(COORD_MIN, COORD_MAX);
+        Point start = randomPoint();
+        Point end = randomPoint();
 
         int attempts = 0, maxAttempts = 50;
         while (distance(start, end) < minDist && attempts++ < maxAttempts) {
-            end = randomPoint(COORD_MIN, COORD_MAX);
+            end = randomPoint();
         }
         if (distance(start, end) < minDist) {
             double angle = rng.nextDouble() * 2 * Math.PI;
-            double ex = clamp(start.x() + minDist * Math.cos(angle), COORD_MIN, COORD_MAX);
-            double ey = clamp(start.y() + minDist * Math.sin(angle), COORD_MIN, COORD_MAX);
+            double ex = clamp(start.x() + minDist * Math.cos(angle), X_COORD_MAX);
+            double ey = clamp(start.y() + minDist * Math.sin(angle), Y_COORD_MAX);
             end = new Point(ex, ey);
         }
         return new Point[] { start, end };
     }
 
-    private Point randomPoint(double min, double max) {
-        double x = min + rng.nextDouble() * (max - min);
-        double y = min + rng.nextDouble() * (max - min);
+    private Point randomPoint() {
+        double x = rng.nextDouble() * X_COORD_MAX;
+        double y = rng.nextDouble() * Y_COORD_MAX;
         return new Point(x, y);
     }
 
@@ -101,8 +112,8 @@ public class RiderWorkload implements Runnable {
         return Math.hypot(dx, dy);
     }
 
-    private double clamp(double v, double min, double max) {
-        return Math.max(min, Math.min(max, v));
+    private double clamp(double v, double max) {
+        return Math.max(0, Math.min(max, v));
     }
 
     public void stop() { this.running = false; }

@@ -25,7 +25,11 @@ public class SimulationEngine {
         System.out.println("[SimulationEngine] Starting scenario: drivers=" + scenario.getDriverCount()
                 + ", riders=" + scenario.getRiderCount()
                 + ", durationSec=" + scenario.getDurationSeconds()
-                + ", timeFactor=" + scenario.getTimeFactor());
+                + ", timeFactor=" + scenario.getTimeFactor()
+                + ", seed=" + scenario.getSeed()
+                + ", map=[" + scenario.getMap().getMaxX() + "x" + scenario.getMap().getMaxY() + "]"
+                + ", minTripDist=" + scenario.getTrip().getMinDistance()
+        );
 
         Random rng = new Random(scenario.getSeed());
 
@@ -42,7 +46,7 @@ public class SimulationEngine {
                 System.out.println("[SimulationEngine] Creating drivers: have=" + drivers.size() + ", need=" + remaining + " (attempt " + attempt + ")");
                 for (int i = drivers.size(); i < target; i++) {
                     try {
-                        var driver = agentFactory.createDriver(i + 1, new Random(rng.nextLong()));
+                        var driver = agentFactory.createDriver(i + 1, new Random(rng.nextLong()), scenario.getMap().getMaxX(), scenario.getMap().getMaxY());
                         if (driver != null) {
                             drivers.add(driver);
                         }

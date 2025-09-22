@@ -19,7 +19,7 @@ class TripMatchingTracker {
     // Sorted set: member = tripId, score = epoch millis when it should expire
     private static final String MATCHING_ZSET = "trip:matching";
 
-    @Value("${trip.matching.timeout.seconds:180}")
+    @Value("${trip.matching.timeout.seconds:80}")
     private long matchingTimeoutSeconds;
 
     void addMatchingTrip(Long tripId, long createdAtEpochMillis) {

@@ -23,7 +23,7 @@ class TripMatchingScheduler {
     private final ApplicationEventPublisher eventPublisher;
 
     // run every 30 seconds by default
-    @Scheduled(fixedDelayString = "${trip.matching.sweeper.fixedDelay.ms:30000}")
+    @Scheduled(fixedDelayString = "${trip.matching.sweeper.fixedDelay.ms:5000}")
     public void sweepExpiredMatchingTrips() {
         long now = Instant.now().toEpochMilli();
         // Fetch trips whose expiration time (score) is <= now

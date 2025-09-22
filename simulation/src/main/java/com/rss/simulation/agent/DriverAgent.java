@@ -22,8 +22,10 @@ public class DriverAgent implements Agent {
     private final AtomicBoolean running = new AtomicBoolean(true);
     private final CoreApiClient coreApiClient;
     private final TripRequestInbox tripRequestInbox;
+    private final double X_COORD_MAX;
+    private final double Y_COORD_MAX;
 
-    private final Integer tickTime = 3000; // milliseconds
+    private final Integer tickTime = 700; // milliseconds
     private final double idleSpeedFactor = 0.3; // move slower when idle
     private Integer remainingTime = 0;
 
@@ -36,19 +38,27 @@ public class DriverAgent implements Agent {
     private Point location;
     private double degree;
 
-    public DriverAgent(int id, SimClock clock, Random rng, Identity identity, CoreApiClient coreApiClient, TripRequestInbox tripRequestInbox) {
+    public DriverAgent(int id,
+                       SimClock clock,
+                       Random rng,
+                       Identity identity,
+                       CoreApiClient coreApiClient,
+                       TripRequestInbox tripRequestInbox,
+                       Double maxX, Double maxY) {
         this.id = id;
         this.clock = clock;
         this.rng = rng;
         this.identity = identity;
         this.coreApiClient = coreApiClient;
         this.tripRequestInbox = tripRequestInbox;
+        this.location = generateRandomPoint();
+        this.X_COORD_MAX = maxX;
+        this.Y_COORD_MAX = maxY;
+        getDirections(generateRandomPoint());
     }
 
     @Override
     public void run() {
-        location = new Point(rng.nextInt(0, 500), rng.nextInt(0, 500));
-        getDirections(new Point(rng.nextInt(0, 500), rng.nextInt(0, 500)));
         try {
             while (running.get()) {
                 if(state == State.IDLE)
@@ -100,7 +110,7 @@ public class DriverAgent implements Agent {
                 } else if (state == State.ON_TRIP) {
                     endTrip();
                 } else if (state == State.IDLE) {
-                    getDirections(new Point(rng.nextInt(0, 500), rng.nextInt(0, 500)));
+                    getDirections(generateRandomPoint());
                 }
             }
             // No time consumed when we just snap over a zero-distance waypoint
@@ -108,7 +118,7 @@ public class DriverAgent implements Agent {
         }
 
         degree = Math.toDegrees(Math.atan2(dy, dx));
-        double speed = target.speed() -20;
+        double speed = target.speed();
         if (state == State.IDLE) {
             speed = speed * idleSpeedFactor;
         }
@@ -135,7 +145,7 @@ public class DriverAgent implements Agent {
                 } else if (state == State.ON_TRIP) {
                     endTrip();
                 } else if (state == State.IDLE) {
-                    getDirections(new Point(rng.nextInt(0, 500), rng.nextInt(0, 500)));
+                    getDirections(generateRandomPoint());
                 }
             }
             return leftover;
@@ -158,7 +168,7 @@ public class DriverAgent implements Agent {
                 trip = null;
             }
             if (trip != null) {
-                getDirections(new Point(trip.startLatitude(), trip.startLongitude()));
+                getDirections(new Point(trip.startX(), trip.startY()));
                 state = State.ON_PICKUP;
                 System.out.println("[DriverAgent] id=" + id + " accepted tripId=" + tripId);
                 break;
@@ -172,7 +182,7 @@ public class DriverAgent implements Agent {
     private void startTrip() {
         trip = coreApiClient.startTrip(trip.id(), identity.getJwt()).block();
         if(trip != null) {
-            getDirections(new Point(trip.endLatitude(), trip.endLongitude()));
+            getDirections(new Point(trip.destX(), trip.destY()));
             System.out.println("[DriverAgent] id=" + id + " started tripId=" + trip.id());
             state = State.ON_TRIP;
         } else {
@@ -186,7 +196,7 @@ public class DriverAgent implements Agent {
         state = State.IDLE;
         trip = null;
         System.out.println("[DriverAgent] id=" + id + " ended trip and is now IDLE");
-        getDirections(new Point(rng.nextInt(0, 500), rng.nextInt(0, 500)));
+        getDirections(generateRandomPoint());
     }
 
     private void getDirections(Point point) {
@@ -251,6 +261,12 @@ public class DriverAgent implements Agent {
 
     private void updateLocation() {
         coreApiClient.updateLocation(location, degree, identity.getJwt());
+    }
+
+    private Point generateRandomPoint() {
+        double x = rng.nextDouble() * X_COORD_MAX;
+        double y = rng.nextDouble() * Y_COORD_MAX;
+        return new Point(x, y);
     }
 
     public enum State {
