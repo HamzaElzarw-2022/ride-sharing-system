@@ -32,9 +32,9 @@ public class AgentFactory {
         this.riderAvailabilityInbox = riderAvailabilityInbox;
     }
 
-    public DriverAgent createDriver(int id, Random rng) {
+    public DriverAgent createDriver(int id, Random rng, double maxX, double maxY) {
         var identity = identityFactory.createIdentity(id, Role.DRIVER);
-        return identity == null ? null : new DriverAgent(id, clock, rng, identity, coreApiClient, tripRequestInbox);
+        return identity == null ? null : new DriverAgent(id, clock, rng, identity, coreApiClient, tripRequestInbox, maxX, maxY);
     }
 
     public RiderWorkload createRiderWorkload(Scenario scenario, Random rng) {
@@ -43,6 +43,6 @@ public class AgentFactory {
             identities.add(identityFactory.createIdentity(i, Role.RIDER));
         }
 
-        return new RiderWorkload(clock, coreApiClient, identities, rng, riderAvailabilityInbox);
+        return new RiderWorkload(clock, coreApiClient, identities, rng, riderAvailabilityInbox, scenario);
     }
 }
