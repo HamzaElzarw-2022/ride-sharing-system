@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { User } from 'lucide-react';
 import type { DriverLocation, TripDto } from '../../services/monitoringService';
 import { worldToScreen } from './BaseMap';
 import type { Vec2 } from './BaseMap';
@@ -35,7 +36,13 @@ export default function DriversLayer({ drivers, trips, zoom, offset, dragging = 
         const pickingUp = !inTrip && myTrips.some(t => t.status === 'PICKING_UP');
 
         const color = inTrip ? '#10b981' : pickingUp ? '#3b82f6' : '#7d7d7d';
-        const w = 30; const h = 15;
+        
+        // Scale car size with zoom and make inactive drivers smaller
+        const baseW = 22; const baseH = 11;
+        const isActive = inTrip || pickingUp;
+        const sizeMultiplier = isActive ? 1 : 0.9; // Inactive drivers are 30% smaller
+        const w = baseW * zoom * sizeMultiplier; 
+        const h = baseH * zoom * sizeMultiplier;
 
         // Determine rotation with minimal change from previous angle for this driver
         const prev = prevAngleRef.current.get(id);
@@ -67,6 +74,12 @@ export default function DriversLayer({ drivers, trips, zoom, offset, dragging = 
             }}
           >
             <div className="rounded-[2px] shadow" style={{ width: '100%', height: '100%', backgroundColor: color }} />
+            {/* Show user icon for drivers who have picked up passengers */}
+            {inTrip && (
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                <User size={Math.max(8, 12 * zoom)} className="text-white drop-shadow rotate-90" />
+              </div>
+            )}
           </div>
         );
       })}

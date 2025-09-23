@@ -1,4 +1,3 @@
-import React from 'react';
 import { Bell, Flag, Handshake, MapPin } from 'lucide-react';
 import { useMonitoring } from '../../context/MonitoringContext';
 

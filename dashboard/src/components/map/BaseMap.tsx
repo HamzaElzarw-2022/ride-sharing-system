@@ -30,7 +30,6 @@ const ROAD_CASING = '#0a0f1a';
 const ROAD_FILL = '#1e293b';
 const ROAD_CENTER = '#facc15';
 const ROAD_CENTER_ALT = '#94a3b8';
-const INTERSECTION_HALO = 'rgba(255,255,255,0.06)';
 
 function drawGrid(ctx: CanvasRenderingContext2D, width: number, height: number, zoom: number, offset: Vec2) {
   const step = 50 * zoom;
@@ -60,25 +59,39 @@ function drawMap(ctx: CanvasRenderingContext2D, data: MapData, size: Vec2, zoom:
 
   const nodeById: Record<number, MapNode> = Object.fromEntries(data.nodes.map(n => [n.id, n]));
   ctx.lineCap = 'round';
+  
+  // Draw all road casings first
+  ctx.strokeStyle = ROAD_CASING;
   for (const e of data.edges) {
     const a = nodeById[e.startId]; const b = nodeById[e.endId]; if (!a || !b) continue;
     const A = worldToScreen(a, zoom, offset); const B = worldToScreen(b, zoom, offset);
     const baseWidth = 6; const speedFactor = Math.min(1.6, Math.max(0.8, e.speed / 50));
     const roadWidth = Math.max(3, baseWidth * speedFactor * zoom); const casingWidth = roadWidth + Math.max(2, 2.5 * zoom);
-    // casing
-    ctx.strokeStyle = ROAD_CASING; ctx.lineWidth = casingWidth; ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke();
-    // fill
-    ctx.strokeStyle = ROAD_FILL; ctx.lineWidth = roadWidth; ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke();
-    // center line
+    ctx.lineWidth = casingWidth;
+    ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke();
+  }
+  
+  // Draw all road fills second
+  ctx.strokeStyle = ROAD_FILL;
+  for (const e of data.edges) {
+    const a = nodeById[e.startId]; const b = nodeById[e.endId]; if (!a || !b) continue;
+    const A = worldToScreen(a, zoom, offset); const B = worldToScreen(b, zoom, offset);
+    const baseWidth = 6; const speedFactor = Math.min(1.6, Math.max(0.8, e.speed / 50));
+    const roadWidth = Math.max(3, baseWidth * speedFactor * zoom);
+    ctx.lineWidth = roadWidth;
+    ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke();
+  }
+  
+  // Draw all center lines last
+  for (const e of data.edges) {
+    const a = nodeById[e.startId]; const b = nodeById[e.endId]; if (!a || !b) continue;
+    const A = worldToScreen(a, zoom, offset); const B = worldToScreen(b, zoom, offset);
     const centerColor = e.speed >= 70 ? ROAD_CENTER : ROAD_CENTER_ALT; const dash = Math.max(6, 10 * zoom); const gap = dash * 0.8;
     ctx.save(); ctx.strokeStyle = centerColor; ctx.lineWidth = Math.max(1, 1.5 * zoom); ctx.setLineDash([dash, gap]);
     ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke(); ctx.restore();
   }
-  for (const n of data.nodes) {
-    const P = worldToScreen(n, zoom, offset); const r = Math.max(3, 5 * zoom);
-    ctx.fillStyle = INTERSECTION_HALO; ctx.beginPath(); ctx.arc(P.x, P.y, r*1.4, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = ROAD_FILL; ctx.beginPath(); ctx.arc(P.x, P.y, r, 0, Math.PI*2); ctx.fill();
-  }
+  // Intersections are now rendered as part of the road network
+  // No separate rendering needed as roads naturally connect at nodes
 }
 
 export type BaseMapProps = {

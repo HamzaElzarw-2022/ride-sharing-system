@@ -65,6 +65,7 @@ services:
       context: ./simulation
       dockerfile: Dockerfile.local
     image: rideshare-simulation:latest
+    profiles: ["excluded"]
     container_name: rideshare_simulation
     depends_on:
       server:

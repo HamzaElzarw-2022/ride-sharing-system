@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { User, MapPin, Car } from 'lucide-react';
 import { useMonitoring } from '../../context/MonitoringContext';
 
