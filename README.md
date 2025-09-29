@@ -4,6 +4,12 @@ A ride-sharing platform prototype inspired by systems like Uber and Lyft. The pr
 
 A project for fun & self development.
 
+## 📊 Screenshots
+
+<img width="1920" height="1080" alt="Screenshot from 2025-09-23 16-43-10" src="https://github.com/user-attachments/assets/33bea819-56b6-4b59-90f1-8791c1ac67a0" />
+
+---
+
 ## 🏗️ Project Structure
 
 ```
@@ -105,12 +111,6 @@ npm run dev
 ```
 
 * **Dashboard UI** → [http://localhost:5173](http://localhost:5173)
-
----
-
-## 📊 Screenshots
-
-<img width="1920" height="1080" alt="Screenshot from 2025-09-23 16-43-10" src="https://github.com/user-attachments/assets/33bea819-56b6-4b59-90f1-8791c1ac67a0" />
 
 ---
 
