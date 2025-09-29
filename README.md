@@ -1,6 +1,6 @@
 # Ride Sharing System
 
-A ride-sharing platform prototype inspired by systems like Uber and Lyft. The project explores building high-speed, scalable systems with real-time trip matching, routing, and monitoring. It includes a ***Spring Boot modular monolith core***, a ***simulation service with autonomous agents***, and a ***React dashboard for live system visualization***.
+A ride-sharing platform prototype inspired by systems like Uber and Lyft. The project explores building high-speed, scalable systems with real-time trip matching, routing, and monitoring. It includes a ***Spring Boot modular monolith core***, a ***simulation service with autonomous agents***, and a ***React dashboard for live system visualization***. Leverages ***Redis***, ***RabbitMQ***, and ***WebSocket*** for event-driven state management and real-time updates.
 
 A project for fun & self development.
 
