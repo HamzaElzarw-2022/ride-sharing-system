@@ -49,8 +49,12 @@ public class Scenario {
 
     public static class TripProperties {
         private int minDistance;
+        private int maxDistance;
 
         public int getMinDistance() { return minDistance; }
         public void setMinDistance(int minDistance) { this.minDistance = minDistance; }
+
+        public int getMaxDistance() { return maxDistance; }
+        public void setMaxDistance(int maxDistance) { this.maxDistance = maxDistance; }
     }
 }

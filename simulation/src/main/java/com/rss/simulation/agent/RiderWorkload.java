@@ -17,6 +17,7 @@ public class RiderWorkload implements Runnable {
     private final double X_COORD_MAX;
     private final double Y_COORD_MAX;
     private final double MIN_TRIP_DISTANCE;
+    private final double MAX_TRIP_DISTANCE;
 
     private static final long MIN_INTERVAL_MS = 1000;   // fastest when many riders are available
     private static final long MAX_INTERVAL_MS = 5000;  // slowest when few/no riders are available
@@ -43,6 +44,7 @@ public class RiderWorkload implements Runnable {
         this.X_COORD_MAX = scenario.getMap().getMaxX();
         this.Y_COORD_MAX = scenario.getMap().getMaxY();
         this.MIN_TRIP_DISTANCE = scenario.getTrip().getMinDistance();
+        this.MAX_TRIP_DISTANCE = scenario.getTrip().getMaxDistance();
         System.out.println("[RiderWorkload] created with " + identities.size() + " identities");
     }
 
@@ -56,7 +58,7 @@ public class RiderWorkload implements Runnable {
                 availabilityInbox.poll().ifPresent(riderId -> {
                     var identity = identities.get(riderId);
                     if (identity != null) {
-                        var route = randomStartEndWithMinDistance(MIN_TRIP_DISTANCE);
+                        var route = randomStartEnd();
                         coreApiClient.requestTrip(route[0], route[1], identity.getJwt())
                             .doOnError(err -> {
                                 System.err.println("[RiderWorkload] rider=" + riderId + " requestTrip error: " + err.getMessage());
@@ -83,20 +85,26 @@ public class RiderWorkload implements Runnable {
         return Math.max(MIN_INTERVAL_MS, Math.min(MAX_INTERVAL_MS, Math.round(interval)));
     }
 
-    private Point[] randomStartEndWithMinDistance(double minDist) {
+    private Point[] randomStartEnd() {
         Point start = randomPoint();
-        Point end = randomPoint();
+        Point end;
 
-        int attempts = 0, maxAttempts = 50;
-        while (distance(start, end) < minDist && attempts++ < maxAttempts) {
+        int attempts = 0;
+        int maxAttempts = 50;
+        do {
             end = randomPoint();
-        }
-        if (distance(start, end) < minDist) {
+            attempts++;
+        } while (attempts < maxAttempts && (distance(start, end) < MIN_TRIP_DISTANCE || distance(start, end) > MAX_TRIP_DISTANCE));
+
+        double dist = distance(start, end);
+        if (dist < MIN_TRIP_DISTANCE || dist > MAX_TRIP_DISTANCE) {
+            double targetDistance = MIN_TRIP_DISTANCE + rng.nextDouble() * (MAX_TRIP_DISTANCE - MIN_TRIP_DISTANCE);
             double angle = rng.nextDouble() * 2 * Math.PI;
-            double ex = clamp(start.x() + minDist * Math.cos(angle), X_COORD_MAX);
-            double ey = clamp(start.y() + minDist * Math.sin(angle), Y_COORD_MAX);
+            double ex = clamp(start.x() + targetDistance * Math.cos(angle), X_COORD_MAX);
+            double ey = clamp(start.y() + targetDistance * Math.sin(angle), Y_COORD_MAX);
             end = new Point(ex, ey);
         }
+
         return new Point[] { start, end };
     }
 

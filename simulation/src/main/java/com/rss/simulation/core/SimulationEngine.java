@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -68,7 +67,13 @@ public class SimulationEngine {
             }
             tasks.add(() -> { riderWorkload.run(); return null; });
 
-            List<Future<Void>> futures = exec.invokeAll(tasks, scenario.getDurationSeconds(), TimeUnit.SECONDS);
+            // If duration is -1 run indefinitely by using invokeAll without timeout.
+            if (scenario.getDurationSeconds() == -1) {
+                // This will block until all tasks complete (which may be never for an indefinite run)
+                exec.invokeAll(tasks);
+            } else {
+                exec.invokeAll(tasks, scenario.getDurationSeconds(), TimeUnit.SECONDS);
+            }
 
             // After duration, request stop
             drivers.forEach(DriverAgent::stop);
