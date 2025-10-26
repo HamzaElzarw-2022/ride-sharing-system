@@ -70,6 +70,7 @@ public class SimulationEngine {
             // If duration is -1 run indefinitely by using invokeAll without timeout.
             if (scenario.getDurationSeconds() == -1) {
                 // This will block until all tasks complete (which may be never for an indefinite run)
+                System.out.println("[SimulationEngine] Running indefinitely");
                 exec.invokeAll(tasks);
             } else {
                 exec.invokeAll(tasks, scenario.getDurationSeconds(), TimeUnit.SECONDS);
