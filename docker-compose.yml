@@ -80,7 +80,7 @@ services:
       spring.rabbitmq.password: password
       sim.driver-count: 8
       sim.rider-count: 4
-      sim.duration-seconds: 1000
+      sim.duration-seconds: -1
       sim.time-factor: 1.0
       sim.seed: 50
       simulation.request.ttl-seconds: 30

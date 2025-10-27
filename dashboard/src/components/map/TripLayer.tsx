@@ -8,7 +8,7 @@ import { worldToScreen } from './BaseMap';
 // Configuration constants for trip visualization
 const TRIP_PATH_OPACITY = 0.6; // Transparency level for trip paths (0-1)
 const MAX_OFFSET_DISTANCE = 2; // Maximum offset distance in world units for parallel paths
-const TRIP_PATH_WIDTH = 5; // Base width multiplier for trip paths
+const TRIP_PATH_WIDTH = 3; // Base width multiplier for trip paths
 const TRIP_DASH_WIDTH = 1.5; // Base width multiplier for dashed lines (arcs and arrows)
 const MIN_ARC_DISTANCE = 15; // Minimum distance to render dashed arcs (in world units)
 const ICON_SIZE = 18; // Size of user and flag icons
@@ -17,7 +17,7 @@ const ICON_SIZE = 18; // Size of user and flag icons
 function getTripColor(tripId: number, alpha = TRIP_PATH_OPACITY): string {
   const hue = (tripId * 137.508) % 360; // Golden angle approximation for good distribution
   const saturation = 70 + (tripId % 3) * 10; // Vary saturation between 70-90%
-  const lightness = 50 + (tripId % 2) * 10; // Vary lightness between 50-60%
+  const lightness = 40 + (tripId % 2) * 10; // Vary lightness between 40-50%
   return `hsla(${hue}, ${saturation}%, ${lightness}%, ${alpha})`;
 }
 
