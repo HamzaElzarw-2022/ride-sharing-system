@@ -5,9 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rss.core.map.entity.Edge;
 import com.rss.core.map.entity.MapMetadata;
 import com.rss.core.map.entity.Node;
+import com.rss.core.map.entity.PolygonArea;
+import com.rss.core.map.entity.PolygonPoint;
 import com.rss.core.map.repository.EdgeRepository;
 import com.rss.core.map.repository.MapMetadataRepository;
 import com.rss.core.map.repository.NodeRepository;
+import com.rss.core.map.repository.PolygonRepository;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +29,7 @@ public class MapService {
     private final NodeRepository nodeRepository;
     private final EdgeRepository edgeRepository;
     private final MapMetadataRepository metadataRepository;
+    private final PolygonRepository polygonRepository;
     private final ObjectMapper objectMapper;
 
     @Value("${map.path}")
@@ -66,7 +70,7 @@ public class MapService {
                 metadataRepository.save(metaData);
 
                 log.info("Map version changed to {}. Updating map...", version);
-                updateMap(rootNode.get("edges"), rootNode.get("nodes"));
+                updateMap(rootNode.get("edges"), rootNode.get("nodes"), rootNode.get("grass"), rootNode.get("water"));
 
             } else {
                 log.info("Map file not found at: {}. Using existing map data.", DEFAULT_MAP_PATH);
@@ -78,7 +82,7 @@ public class MapService {
         }
     }
 
-    public void updateMap(JsonNode jsonEdges, JsonNode jsonNodes) {
+    public void updateMap(JsonNode jsonEdges, JsonNode jsonNodes, JsonNode jsonGrass, JsonNode jsonWater) {
         if(jsonNodes == null || !jsonNodes.isArray() || jsonNodes.isEmpty()) {
             log.warn("No nodes provided for map update. Aborting.");
             return;
@@ -86,6 +90,7 @@ public class MapService {
 
         edgeRepository.deleteAll();
         nodeRepository.deleteAll();
+        polygonRepository.deleteAll();
 
         // Determine original bounds (x,y can be negative or positive)
         long minX = Long.MAX_VALUE, minY = Long.MAX_VALUE;
@@ -152,7 +157,51 @@ public class MapService {
         }
 
         edgeRepository.saveAll(edges);
-        log.info("Map updated: {} nodes, {} edges. Normalized to (0,0)-( {}, {} ).", tempNodes.size(), edges.size(), DEFAULT_LONGITUDE, DEFAULT_LATITUDE);
+
+        List<PolygonArea> polygons = new ArrayList<>();
+        if (jsonGrass != null && jsonGrass.isArray()) {
+            for (JsonNode polygonNode : jsonGrass) {
+                PolygonArea polygon = new PolygonArea();
+                polygon.setType(PolygonArea.PolygonType.GRASS);
+                List<PolygonPoint> points = new ArrayList<>();
+                for (JsonNode pointNode : polygonNode) {
+                    long rawX = pointNode.get("x").asLong();
+                    long rawY = pointNode.get("y").asLong();
+                    long normX = Math.round((rawX - minX) * scaleX);
+                    long normY = Math.round((rawY - minY) * scaleY);
+                    PolygonPoint point = new PolygonPoint();
+                    point.setX(normX);
+                    point.setY(normY);
+                    point.setPolygon(polygon);
+                    points.add(point);
+                }
+                polygon.setPoints(points);
+                polygons.add(polygon);
+            }
+        }
+        if (jsonWater != null && jsonWater.isArray()) {
+            for (JsonNode polygonNode : jsonWater) {
+                PolygonArea polygon = new PolygonArea();
+                polygon.setType(PolygonArea.PolygonType.WATER);
+                List<PolygonPoint> points = new ArrayList<>();
+                for (JsonNode pointNode : polygonNode) {
+                    long rawX = pointNode.get("x").asLong();
+                    long rawY = pointNode.get("y").asLong();
+                    long normX = Math.round((rawX - minX) * scaleX);
+                    long normY = Math.round((rawY - minY) * scaleY);
+                    PolygonPoint point = new PolygonPoint();
+                    point.setX(normX);
+                    point.setY(normY);
+                    point.setPolygon(polygon);
+                    points.add(point);
+                }
+                polygon.setPoints(points);
+                polygons.add(polygon);
+            }
+        }
+        polygonRepository.saveAll(polygons);
+
+        log.info("Map updated: {} nodes, {} edges, {} polygons. Normalized to (0,0)-( {}, {} ).", tempNodes.size(), edges.size(), polygons.size(), DEFAULT_LONGITUDE, DEFAULT_LATITUDE);
     }
 
     public Map<String, Object> getCurrentMap() {
@@ -186,10 +235,36 @@ public class MapService {
                     return m;
                 }).collect(Collectors.toList());
 
+        List<PolygonArea> persistedPolygons = polygonRepository.findAll();
+        List<Map<String, Object>> grassPolygons = new ArrayList<>();
+        List<Map<String, Object>> waterPolygons = new ArrayList<>();
+
+        for (PolygonArea polygon : persistedPolygons) {
+            List<Map<String, Long>> points = polygon.getPoints().stream()
+                    .map(p -> {
+                        Map<String, Long> point = new LinkedHashMap<>();
+                        point.put("x", p.getX());
+                        point.put("y", p.getY());
+                        return point;
+                    })
+                    .collect(Collectors.toList());
+
+            Map<String, Object> polygonMap = new LinkedHashMap<>();
+            polygonMap.put("points", points);
+
+            if (polygon.getType() == PolygonArea.PolygonType.GRASS) {
+                grassPolygons.add(polygonMap);
+            } else if (polygon.getType() == PolygonArea.PolygonType.WATER) {
+                waterPolygons.add(polygonMap);
+            }
+        }
+
         Map<String, Object> root = new LinkedHashMap<>();
         root.put("version", version);
         root.put("nodes", nodes);
         root.put("edges", edges);
+        root.put("grass", grassPolygons);
+        root.put("water", waterPolygons);
         return root;
     }
 }
