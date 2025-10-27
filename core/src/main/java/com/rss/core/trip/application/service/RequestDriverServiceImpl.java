@@ -8,6 +8,7 @@ import com.rss.core.trip.domain.entity.Trip;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -28,7 +29,14 @@ public class RequestDriverServiceImpl implements RequestDriverService {
     private final String DRIVER_REQUEST_KEY = "driver:request:"; // driver_requests:{tripId} -> set of driverIds
 
     @Override
+    @Async
     public void requestDriver(Trip trip) {
+        try {
+            TimeUnit.SECONDS.sleep(2); // pause before execution
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+        }
+
         Set<Long> driverIds = locationInternalApi.findNearbyDrivers(
                 trip.getStartPoint().getX(),
                 trip.getStartPoint().getY());
@@ -44,9 +52,6 @@ public class RequestDriverServiceImpl implements RequestDriverService {
             redisTemplate.opsForSet().add(key, driverId.toString());
         }
         redisTemplate.expire(key, driverRequestExpirySeconds, TimeUnit.SECONDS);
-
-        // TODO: handle no drivers available case (e.g., notify user, retry later, etc.)
-        // TODO: handle case where no drivers respond in time (e.g., cancel trip or retry)
 
         // Notify drivers in batches
         notifyDriversInBatches(driverIds, trip.getId());
