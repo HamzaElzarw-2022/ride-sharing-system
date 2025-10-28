@@ -11,7 +11,7 @@ export default function Dashboard() {
   return (
     <div className="flex w-full h-full">
       <Sidebar />
-      <div className="flex-1 h-full">
+      <div className="flex-1 h-full overflow-hidden">
         <MapContainer>
           <BaseMap />
           <TripLayer trips={trips} routes={routes} /> 
