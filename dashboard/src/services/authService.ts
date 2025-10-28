@@ -27,3 +27,12 @@ export async function login(data: LoginData): Promise<AuthResponse> {
   const response = await api.post('/auth/authenticate', data);
   return response.data;
 }
+
+export function getToken(): string | null {
+  const stored = localStorage.getItem('auth');
+  if (stored) {
+    const auth = JSON.parse(stored) as AuthResponse;
+    return auth.token;
+  }
+  return null;
+}

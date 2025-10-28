@@ -18,7 +18,7 @@ public class TripWebSocketConfig implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(tripWebSocketHandler, "/ws/trip/{tripId}")
                 .addInterceptors(tripHandshakeInterceptor)
-                .setAllowedOrigins("*");
+                // Accept all origins in dev; consider tightening in prod to specific domains
+                .setAllowedOriginPatterns("*");
     }
 }
-

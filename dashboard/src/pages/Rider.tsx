@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import MapContainer from '../components/MapContainer';
 import { useAuth } from '../context/AuthContext';
 import AuthView from '../components/AuthView';
@@ -10,6 +10,7 @@ import RouteLayer from '../components/map/RouteLayer';
 import BaseMap from '../components/map/BaseMap';
 import type { RiderState } from '../types';
 import { ArrowLeft } from 'lucide-react';
+import { connectTrip, type TripMessage } from '../services/tripWebSocketService';
 
 export default function Rider() {
   const { auth } = useAuth();
@@ -18,6 +19,9 @@ export default function Rider() {
   const [endPoint, setEndPoint] = useState<Point | null>(null);
   const [route, setRoute] = useState<RouteStep[]>([]);
   const [isSelecting, setIsSelecting] = useState<'start' | 'end' | null>(null);
+  const [tripId, setTripId] = useState<number | null>(null);
+  const [driverLocation, setDriverLocation] = useState<Point | null>(null);
+  const ws = useRef<WebSocket | null>(null);
 
   const handleBack = () => {
     setState('initial');
@@ -25,6 +29,12 @@ export default function Rider() {
     setEndPoint(null);
     setRoute([]);
     setIsSelecting(null);
+    setTripId(null);
+    setDriverLocation(null);
+    if (ws.current) {
+      ws.current.close();
+      ws.current = null;
+    }
   };
 
   const handleMapClick = async (point: Point) => {
@@ -51,12 +61,58 @@ export default function Rider() {
     if (startPoint && endPoint) {
       setState('matching');
       try {
-        await requestTrip({ start: startPoint, end: endPoint });
-        // Connect to websocket here
+        const response = await requestTrip({ start: startPoint, end: endPoint });
+        console.log("Trip requested successfully: " + response.id);
+        setTripId(response.id);
       } catch (error) {
         console.error("Failed to request trip", error);
         setState('route_selected'); // Or show an error state
       }
+    }
+  };
+
+  useEffect(() => {
+    if (tripId) {
+      ws.current = connectTrip(tripId, handleTripMessage);
+    }
+    return () => {
+      if (ws.current) {
+        ws.current.close();
+      }
+    };
+  }, [tripId]);
+
+  const handleTripMessage = (msg: TripMessage) => {
+    console.log("Received trip message", msg.type);
+    switch (msg.type) {
+      case 'trip.matched':
+        setState('picking_up');
+        break;
+      case 'trip.started':
+        setState('started');
+        break;
+      case 'trip.ended':
+        setState(currentState => {
+          if (currentState === 'matching') {
+            return 'no_driver_found';
+          } else {
+            return 'completed';
+          }
+        });
+        if (ws.current) {
+          ws.current.close();
+        }
+        break;
+      case 'driver.location':
+        setState(currentState => {
+          if (currentState === 'matching') {
+            return 'picking_up';
+          } else {
+            return currentState;
+          }
+        });
+        setDriverLocation({ x: msg.payload.x, y: msg.payload.y });
+        break;
     }
   };
 
@@ -66,7 +122,7 @@ export default function Rider() {
     return `(${point.x.toFixed(2)}, ${point.y.toFixed(2)})`;
   };
 
-  const showBackButton = (isSelecting !== null) || (state !== 'initial' && state !== 'matching' && state !== 'in_progress' && state !== 'completed');
+  const showBackButton = (isSelecting !== null) || (state !== 'initial' && state !== 'matching' && state !== 'started' && state !== 'picking_up');
 
   if (!auth) {
     return (
@@ -92,6 +148,7 @@ export default function Rider() {
         <MapContainer onMapClick={isSelecting ? handleMapClick : undefined}>
           <BaseMap />
           <RouteLayer route={route} start={startPoint} end={endPoint} />
+          {/* {driverLocation} */}
         </MapContainer>
         <RiderPanel
           state={state}
@@ -106,3 +163,4 @@ export default function Rider() {
     </div>
   );
 }
+

@@ -1,8 +1,9 @@
 export type RiderState =
   | 'initial'
-  | 'selecting_start'
-  | 'selecting_end'
   | 'route_selected'
   | 'matching'
-  | 'in_progress'
+  | 'no_driver_found'
+  | 'picking_up'
+  | 'started'
   | 'completed';
+

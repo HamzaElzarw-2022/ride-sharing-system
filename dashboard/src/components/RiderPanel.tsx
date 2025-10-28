@@ -1,4 +1,4 @@
-import { Search, MapPin, ArrowRight, Locate } from 'lucide-react';
+import { MapPin, ArrowRight, Locate } from 'lucide-react';
 import type { RiderState } from '../types';
 
 interface RiderPanelProps {
@@ -93,8 +93,29 @@ export default function RiderPanel({ state, onConfirm, onSetDestination, onSetSt
 
   const renderInProgress = () => (
     <div>
-      <h2 className="font-bold text-lg">Trip in Progress</h2>
-      <p className="text-sm text-slate-500">Your driver is on the way.</p>
+      <h2 className="font-bold text-lg">Trip started</h2>
+      <p className="text-sm text-slate-500">On the way...</p>
+    </div>
+  );
+
+  const renderPickingUp = () => (
+    <div>
+      <h2 className="font-bold text-lg">Picking up</h2>
+      <p className="text-sm text-slate-500">Your driver will arrive shortly.</p>
+    </div>
+  );
+
+  const renderNoDriverFound = () => (
+    <div>
+      <h2 className="font-bold text-lg">No drivers available</h2>
+      <p className="text-sm text-slate-500">Use the arrow arrow at the top left to go back and try again</p>
+    </div>
+  );
+
+  const renderTripCompleted = () => (
+    <div>
+      <h2 className="font-bold text-lg">You have arrived!</h2>
+      <p className="text-sm text-slate-500">Use the arrow arrow at the top left to go back</p>
     </div>
   );
 
@@ -104,11 +125,15 @@ export default function RiderPanel({ state, onConfirm, onSetDestination, onSetSt
         return renderRouteSelected();
       case 'matching':
         return renderMatching();
-      case 'in_progress':
+      case 'picking_up':
+        return renderPickingUp();
+      case 'no_driver_found':
+        return renderNoDriverFound();
+      case 'started':
         return renderInProgress();
+      case 'completed':
+        return renderTripCompleted();
       case 'initial':
-      case 'selecting_start':
-      case 'selecting_end':
       default:
         return (
           <div>
