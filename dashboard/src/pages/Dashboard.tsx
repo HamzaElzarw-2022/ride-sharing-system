@@ -1,4 +1,4 @@
-import MapCanvas from '../components/MapCanvas';
+import MapContainer from '../components/MapContainer';
 import Sidebar from '../components/Sidebar';
 
 export default function Dashboard() {
@@ -7,7 +7,7 @@ export default function Dashboard() {
       <Sidebar />
       <div className="flex-1 p-4 flex">
         <div className="flex-1 h-full rounded-xl overflow-hidden border border-slate-800">
-          <MapCanvas />
+          <MapContainer />
         </div>
       </div>
       
