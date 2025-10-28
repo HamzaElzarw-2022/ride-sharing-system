@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import BaseMap, { fitView, type Vec2 } from './map/BaseMap';
+import type { Vec2 } from './map/BaseMap';
 import { fetchMap } from '../services/mapService';
 import type { MapData } from '../services/mapService';
 import { useMapInteractions } from '../hooks/useMapInteractions';
@@ -10,7 +10,7 @@ interface MapContainerProps {
 }
 
 export default function MapContainer({ children, onMapClick }: MapContainerProps) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const [data, setData] = useState<MapData | null>(null);
   const {
     zoom,
@@ -23,7 +23,7 @@ export default function MapContainer({ children, onMapClick }: MapContainerProps
     onMouseLeave,
     fitMap,
     setZoom,
-  } = useMapInteractions(data, canvasRef);
+  } = useMapInteractions(data, containerRef);
 
   // Fetch map
   useEffect(() => {
@@ -33,8 +33,8 @@ export default function MapContainer({ children, onMapClick }: MapContainerProps
   }, []);
 
   const handleCanvasClick = (e: React.MouseEvent) => {
-    if (onMapClick && canvasRef.current) {
-      const rect = canvasRef.current.getBoundingClientRect();
+    if (onMapClick && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
       const mouse = { x: e.clientX - rect.left, y: e.clientY - rect.top };
       const worldPoint = { x: mouse.x / zoom + offset.x, y: mouse.y / zoom + offset.y };
       onMapClick(worldPoint);
@@ -42,22 +42,20 @@ export default function MapContainer({ children, onMapClick }: MapContainerProps
   };
 
   return (
-    <BaseMap
-      data={data}
-      zoom={zoom}
-      offset={offset}
+    <div 
+      ref={containerRef} 
+      className="w-full h-full relative select-none cursor-grab active:cursor-grabbing z-10"
       onWheel={onWheel}
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
       onMouseLeave={onMouseLeave}
       onClick={handleCanvasClick}
-      canvasRef={canvasRef}
     >
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
           return React.cloneElement(child as React.ReactElement<any>, {
-            canvasRef,
+            data,
             zoom,
             offset,
             dragging,
@@ -71,6 +69,6 @@ export default function MapContainer({ children, onMapClick }: MapContainerProps
         <button className="px-2 py-1 rounded bg-white/10 text-white border border-white/20 hover:bg-white/20" onClick={() => setZoom((z) => Math.max(0.2, z / 1.2))}>-</button>
         <button className="px-2 py-1 rounded bg-white/10 text-white border border-white/20 hover:bg-white/20" onClick={fitMap}>Fit</button>
       </div>
-    </BaseMap>
+    </div>
   );
 }

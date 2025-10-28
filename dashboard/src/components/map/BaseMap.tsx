@@ -96,20 +96,14 @@ function drawMap(ctx: CanvasRenderingContext2D, data: MapData, size: Vec2, zoom:
 }
 
 export type BaseMapProps = {
-  children: React.ReactNode;
   data: MapData | null;
   zoom: number;
   offset: Vec2;
-  onWheel: (e: React.WheelEvent) => void;
-  onMouseDown: (e: React.MouseEvent) => void;
-  onMouseMove: (e: React.MouseEvent) => void;
-  onMouseUp: (e: React.MouseEvent) => void;
-  onMouseLeave: (e: React.MouseEvent) => void;
-  canvasRef: React.RefObject<HTMLCanvasElement | null>;
 };
 
 export default function BaseMap(props: BaseMapProps) {
-  const { data, zoom, offset, onWheel, onMouseDown, onMouseMove, onMouseUp, onMouseLeave, canvasRef } = props;
+  const { data, zoom, offset } = props;
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const render = useCallback(() => {
@@ -123,7 +117,7 @@ export default function BaseMap(props: BaseMapProps) {
     }
     // notify listeners that BaseMap finished rendering
   try { window.dispatchEvent(new CustomEvent('basemap-rendered')); } catch { /* noop */ }
-  }, [canvasRef, data, zoom, offset]);
+  }, [data, zoom, offset]);
 
   useEffect(() => { render(); }, [render]);
 
@@ -140,20 +134,14 @@ export default function BaseMap(props: BaseMapProps) {
     if (containerRef.current) ro.observe(containerRef.current);
     resize();
     return () => ro.disconnect();
-  }, [canvasRef, render]);
+  }, [render]);
 
   return (
-    <div ref={containerRef} className="w-full h-full relative select-none">
+    <div ref={containerRef} className="w-full h-full absolute top-0 left-0 pointer-events-none">
       <canvas
         ref={canvasRef}
-        className="w-full h-full cursor-grab active:cursor-grabbing rounded-xl shadow-inner shadow-black/40"
-        onWheel={onWheel}
-        onMouseDown={onMouseDown}
-        onMouseMove={onMouseMove}
-        onMouseUp={onMouseUp}
-        onMouseLeave={onMouseLeave}
+        className="w-full h-full rounded-xl shadow-inner shadow-black/40"
       />
-      {props.children}
     </div>
   );
 }
