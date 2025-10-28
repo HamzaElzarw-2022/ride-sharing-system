@@ -102,24 +102,36 @@ export type BaseMapProps = {
 };
 
 export default function BaseMap(props: BaseMapProps) {
-  const { data, zoom, offset } = props;
+  const { data } = props;
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const view = useRef({ zoom: props.zoom, offset: props.offset });
+  view.current = { zoom: props.zoom, offset: props.offset };
 
   const render = useCallback(() => {
     const canvas = canvasRef.current; if (!canvas) return;
     const ctx = canvas.getContext('2d'); if (!ctx) return;
     const size = { x: canvas.clientWidth, y: canvas.clientHeight };
     if (data) {
-      drawMap(ctx, data, size, zoom, offset);
+      drawMap(ctx, data, size, view.current.zoom, view.current.offset);
     } else {
       ctx.fillStyle = BG; ctx.fillRect(0, 0, size.x, size.y);
     }
     // notify listeners that BaseMap finished rendering
   try { window.dispatchEvent(new CustomEvent('basemap-rendered')); } catch { /* noop */ }
-  }, [data, zoom, offset]);
+  }, [data]);
 
-  useEffect(() => { render(); }, [render]);
+  useEffect(() => {
+    const handleRedraw = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      view.current = detail;
+      render();
+    };
+    window.addEventListener('map-redraw', handleRedraw);
+    return () => window.removeEventListener('map-redraw', handleRedraw);
+  }, [render]);
+
+  useEffect(() => { render(); }, [render, props.zoom, props.offset]);
 
   useEffect(() => {
     function resize() {

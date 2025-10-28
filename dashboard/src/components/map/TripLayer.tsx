@@ -129,15 +129,18 @@ function buildRoutePolyline(route: RouteResponse): {x:number;y:number}[] {
   return pts;
 }
 
-export default function TripLayer({ trips, routes, zoom, offset }: {
+export default function TripLayer({ trips, routes, zoom, offset, dragging }: {
   trips: TripDto[];
   routes: Map<number, RouteResponse>;
   zoom: number;
   offset: Vec2;
+  dragging?: boolean;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const tripOffsetsRef = useRef<Map<number, number>>(new Map());
+  const view = useRef({ zoom, offset });
+  view.current = { zoom, offset };
 
   const render = useCallback(() => {
     const canvas = canvasRef.current; if (!canvas) return;
@@ -169,10 +172,10 @@ export default function TripLayer({ trips, routes, zoom, offset }: {
             usedOffsets.add(0);
             break;
           }
-          const offset = MAX_OFFSET_DISTANCE * Math.ceil(i / 2) * (i % 2 === 1 ? 1 : -1);
-          if (!usedOffsets.has(offset)) {
-            tripOffsets.set(t.id, offset);
-            usedOffsets.add(offset);
+          const offsetVal = MAX_OFFSET_DISTANCE * Math.ceil(i / 2) * (i % 2 === 1 ? 1 : -1);
+          if (!usedOffsets.has(offsetVal)) {
+            tripOffsets.set(t.id, offsetVal);
+            usedOffsets.add(offsetVal);
             break;
           }
           i++;
@@ -198,12 +201,12 @@ export default function TripLayer({ trips, routes, zoom, offset }: {
       );
       if (t.status === 'PICKING_UP' && startDistance >= MIN_ARC_DISTANCE) {
         // start original -> start projection (dashed arc) - only for PICKING_UP
-        drawDashedArc(ctx, r.startPointProjection.originalPoint, r.startPointProjection.projectionPoint, zoom, offset, color, offsetDistance);
+        drawDashedArc(ctx, r.startPointProjection.originalPoint, r.startPointProjection.projectionPoint, view.current.zoom, view.current.offset, color, offsetDistance);
       }
       
       // polyline along the route from start projection through steps to destination projection
       const pts = buildRoutePolyline(r);
-      drawPolyline(ctx, pts, zoom, offset, color, offsetDistance);
+      drawPolyline(ctx, pts, view.current.zoom, view.current.offset, color, offsetDistance);
       
       // Check if destination arrow should be rendered based on distance
       const destDistance = Math.hypot(
@@ -212,12 +215,22 @@ export default function TripLayer({ trips, routes, zoom, offset }: {
       );
       if (destDistance >= MIN_ARC_DISTANCE) {
         // destination projection -> destination original (dashed line)
-        drawDashedLine(ctx, r.destinationPointProjection.projectionPoint, r.destinationPointProjection.originalPoint, zoom, offset, color, offsetDistance);
+        drawDashedLine(ctx, r.destinationPointProjection.projectionPoint, r.destinationPointProjection.originalPoint, view.current.zoom, view.current.offset, color, offsetDistance);
       }
     });
-  }, [trips, routes, zoom, offset]);
+  }, [trips, routes]);
 
-  useEffect(() => { render(); }, [render]);
+  useEffect(() => {
+    const handleRedraw = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      view.current = detail;
+      render();
+    };
+    window.addEventListener('map-redraw', handleRedraw);
+    return () => window.removeEventListener('map-redraw', handleRedraw);
+  }, [render]);
+
+  useEffect(() => { render(); }, [render, zoom, offset]);
   useEffect(() => {
     function onBaseMapRendered() { render(); }
     window.addEventListener('basemap-rendered', onBaseMapRendered);
