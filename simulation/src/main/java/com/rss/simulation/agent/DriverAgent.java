@@ -26,6 +26,7 @@ public class DriverAgent implements Agent {
     private final double Y_COORD_MAX;
 
     private final Integer tickTime = 700; // milliseconds
+    private final double speedFactore = 0.4;
     private final double idleSpeedFactor = 0.3; // move slower when idle
     private Integer remainingTime = 0;
 
@@ -121,6 +122,8 @@ public class DriverAgent implements Agent {
         double speed = target.speed();
         if (state == State.IDLE) {
             speed = speed * idleSpeedFactor;
+        } else {
+            speed = speed * speedFactore;
         }
 
         double maxMove = speed * time;

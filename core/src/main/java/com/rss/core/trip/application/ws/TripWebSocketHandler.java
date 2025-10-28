@@ -77,7 +77,8 @@ public class TripWebSocketHandler extends TextWebSocketHandler {
                 "tripId", tripId,
                 "driverId", driverId,
                 "x", location.getX(),
-                "y", location.getY()
+                "y", location.getY(),
+                "degree", location.getDegree()
         ));
     }
 

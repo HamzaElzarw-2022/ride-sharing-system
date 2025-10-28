@@ -11,6 +11,9 @@ import BaseMap from '../components/map/BaseMap';
 import type { RiderState } from '../types';
 import { ArrowLeft } from 'lucide-react';
 import { connectTrip, type TripMessage } from '../services/tripWebSocketService';
+import DriverLayer from '../components/map/DriverLayer';
+
+type DriverLocation = Point & { degree: number };
 
 export default function Rider() {
   const { auth } = useAuth();
@@ -20,7 +23,7 @@ export default function Rider() {
   const [route, setRoute] = useState<RouteStep[]>([]);
   const [isSelecting, setIsSelecting] = useState<'start' | 'end' | null>(null);
   const [tripId, setTripId] = useState<number | null>(null);
-  const [driverLocation, setDriverLocation] = useState<Point | null>(null);
+  const [driverLocation, setDriverLocation] = useState<DriverLocation | null>(null);
   const ws = useRef<WebSocket | null>(null);
 
   const handleBack = () => {
@@ -62,7 +65,6 @@ export default function Rider() {
       setState('matching');
       try {
         const response = await requestTrip({ start: startPoint, end: endPoint });
-        console.log("Trip requested successfully: " + response.id);
         setTripId(response.id);
       } catch (error) {
         console.error("Failed to request trip", error);
@@ -83,7 +85,6 @@ export default function Rider() {
   }, [tripId]);
 
   const handleTripMessage = (msg: TripMessage) => {
-    console.log("Received trip message", msg.type);
     switch (msg.type) {
       case 'trip.matched':
         setState('picking_up');
@@ -111,7 +112,7 @@ export default function Rider() {
             return currentState;
           }
         });
-        setDriverLocation({ x: msg.payload.x, y: msg.payload.y });
+        setDriverLocation({ x: msg.payload.x, y: msg.payload.y, degree: msg.payload.degree });
         break;
     }
   };
@@ -148,7 +149,7 @@ export default function Rider() {
         <MapContainer onMapClick={isSelecting ? handleMapClick : undefined}>
           <BaseMap />
           <RouteLayer route={route} start={startPoint} end={endPoint} />
-          {/* {driverLocation} */}
+          <DriverLayer position={driverLocation} />
         </MapContainer>
         <RiderPanel
           state={state}

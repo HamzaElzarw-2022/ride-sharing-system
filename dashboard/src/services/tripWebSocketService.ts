@@ -20,6 +20,7 @@ export type DriverLocationPayload = {
   driverId: number;
   x: number;
   y: number;
+  degree: number;
 };
 
 export type TripMessage =
