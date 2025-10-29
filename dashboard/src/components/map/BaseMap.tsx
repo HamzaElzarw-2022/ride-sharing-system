@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import type { MapData, MapNode } from '../../services/mapService';
 import { drawPolygons } from './polygonRenderer';
 
@@ -96,17 +96,17 @@ function drawMap(ctx: CanvasRenderingContext2D, data: MapData, size: Vec2, zoom:
 }
 
 export type BaseMapProps = {
-  data: MapData | null;
-  zoom: number;
-  offset: Vec2;
+  data?: MapData | null;
+  zoom?: number;
+  offset?: Vec2;
 };
 
 export default function BaseMap(props: BaseMapProps) {
-  const { data } = props;
+  const { data, zoom = 13, offset = { x: 0, y: 0 } } = props;
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const view = useRef({ zoom: props.zoom, offset: props.offset });
-  view.current = { zoom: props.zoom, offset: props.offset };
+  const view = useRef({ zoom, offset });
+  view.current = { zoom, offset };
 
   const render = useCallback(() => {
     const canvas = canvasRef.current; if (!canvas) return;

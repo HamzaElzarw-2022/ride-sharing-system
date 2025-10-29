@@ -78,8 +78,8 @@ services:
       spring.rabbitmq.port: 5672
       spring.rabbitmq.username: user
       spring.rabbitmq.password: password
-      sim.driver-count: 8
-      sim.rider-count: 4
+      sim.driver-count: 16
+      sim.rider-count: 8
       sim.duration-seconds: -1
       sim.time-factor: 1.0
       sim.seed: 50

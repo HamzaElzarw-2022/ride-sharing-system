@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { User, Flag } from 'lucide-react';
 import type { TripDto } from '../../services/monitoringService';
 import type { RouteResponse, RouteStep } from '../../services/routeService';
@@ -129,12 +129,11 @@ function buildRoutePolyline(route: RouteResponse): {x:number;y:number}[] {
   return pts;
 }
 
-export default function TripLayer({ trips, routes, zoom, offset, dragging }: {
+export default function TripLayer({ trips, routes, zoom = 13, offset = { x: 0, y: 0 } }: {
   trips: TripDto[];
   routes: Map<number, RouteResponse>;
-  zoom: number;
-  offset: Vec2;
-  dragging?: boolean;
+  zoom?: number;
+  offset?: Vec2;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);

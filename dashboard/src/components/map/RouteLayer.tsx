@@ -5,11 +5,11 @@ interface RouteLayerProps {
   route: RouteStep[];
   start: Point | null;
   end: Point | null;
-  zoom: number;
-  offset: Point;
+  zoom?: number;
+  offset?: Point;
 }
 
-export default function RouteLayer({ route, start, end, zoom, offset }: RouteLayerProps) {
+export default function RouteLayer({ route, start, end, zoom = 13, offset = { x: 0, y: 0 } }: RouteLayerProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 

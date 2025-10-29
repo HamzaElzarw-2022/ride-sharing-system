@@ -5,7 +5,12 @@ import type { Vec2 } from './BaseMap';
 
 type DriverLocation = Point & { degree: number };
 
-export default function DriverLayer({ position, zoom, offset, dragging = false }: { position: DriverLocation | null; zoom: number; offset: Vec2; dragging?: boolean; }) {
+export default function DriverLayer({ position, zoom = 13, offset = { x: 0, y: 0 }, dragging = false }: {
+  position: DriverLocation | null,
+  zoom?: number,
+  offset?: Vec2,
+  dragging?: boolean
+}) {
   const firstPaintRef = useRef(true);
   const prevAngleRef = useRef<number | null>(null);
 

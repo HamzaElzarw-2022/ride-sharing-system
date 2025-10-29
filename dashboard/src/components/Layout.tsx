@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Smartphone } from 'lucide-react';
 import { MonitoringProvider } from '../context/MonitoringContext';
@@ -10,7 +10,6 @@ const navItems = [
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
-  const [sidebarTab, setSidebarTab] = useState<SidebarActiveTab>('events');
 
   return (
     <MonitoringProvider>
