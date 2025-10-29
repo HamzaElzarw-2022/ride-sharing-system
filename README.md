@@ -6,7 +6,8 @@ A project for fun & self development.
 
 ## 📊 Screenshots
 
-<img width="1920" height="1080" alt="Screenshot from 2025-09-23 16-43-10" src="https://github.com/user-attachments/assets/33bea819-56b6-4b59-90f1-8791c1ac67a0" />
+<img width="1920" height="1048" alt="Screenshot from 2025-10-29 03-17-49" src="https://github.com/user-attachments/assets/87db0d80-e29b-4cb9-ac79-be90c7d8a0a0" />
+<img width="1920" height="1048" alt="Screenshot from 2025-10-29 03-31-54" src="https://github.com/user-attachments/assets/fd74bfe7-4ea8-4d06-80f8-f73846b883b5" />
 
 ---
 
