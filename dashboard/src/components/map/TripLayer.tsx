@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { User, Flag } from 'lucide-react';
 import type { TripDto } from '../../services/monitoringService';
 import type { RouteResponse, RouteStep } from '../../services/routeService';
@@ -129,32 +129,69 @@ function buildRoutePolyline(route: RouteResponse): {x:number;y:number}[] {
   return pts;
 }
 
-export default function TripLayer({ canvasRef, trips, routes, zoom, offset }: {
-  canvasRef: React.RefObject<HTMLCanvasElement | null>;
+export default function TripLayer({ trips, routes, zoom = 13, offset = { x: 0, y: 0 } }: {
   trips: TripDto[];
   routes: Map<number, RouteResponse>;
-  zoom: number;
-  offset: Vec2;
+  zoom?: number;
+  offset?: Vec2;
 }) {
-  const raf = useRef<number | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const tripOffsetsRef = useRef<Map<number, number>>(new Map());
+  const view = useRef({ zoom, offset });
+  view.current = { zoom, offset };
 
-  function render() {
+  const render = useCallback(() => {
     const canvas = canvasRef.current; if (!canvas) return;
     const ctx = canvas.getContext('2d'); if (!ctx) return;
 
-    // Get active trips and assign them indices for offset calculation
+    // Clear the entire canvas before drawing
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Get active trips and manage their offsets for stable rendering
     const activeTrips = trips.filter(t => t.status === 'PICKING_UP' || t.status === 'STARTED');
+    const tripOffsets = tripOffsetsRef.current;
+    const activeTripIds = new Set(activeTrips.map(t => t.id));
+
+    // Clean up offsets for trips that are no longer active
+    for (const tripId of tripOffsets.keys()) {
+      if (!activeTripIds.has(tripId)) {
+        tripOffsets.delete(tripId);
+      }
+    }
+
+    // Assign stable offsets to active trips
+    const usedOffsets = new Set(tripOffsets.values());
+    activeTrips.forEach(t => {
+      if (!tripOffsets.has(t.id)) {
+        let i = 0;
+        while (true) {
+          if (i === 0 && !usedOffsets.has(0)) {
+            tripOffsets.set(t.id, 0);
+            usedOffsets.add(0);
+            break;
+          }
+          const offsetVal = MAX_OFFSET_DISTANCE * Math.ceil(i / 2) * (i % 2 === 1 ? 1 : -1);
+          if (!usedOffsets.has(offsetVal)) {
+            tripOffsets.set(t.id, offsetVal);
+            usedOffsets.add(offsetVal);
+            break;
+          }
+          i++;
+        }
+      }
+    });
     
-    // Draw routes and connecting arcs with unique colors and offsets
-    activeTrips.forEach((t, index) => {
+    // Draw routes and connecting arcs with unique colors and stable offsets
+    activeTrips.forEach((t) => {
       const r = routes.get(t.id);
       if (!r) return;
       
       // Generate unique color with transparency
       const color = getTripColor(t.id);
       
-      // Calculate offset distance based on trip index
-      const offsetDistance = index === 0 ? 0 : (index % 2 === 1 ? MAX_OFFSET_DISTANCE : -MAX_OFFSET_DISTANCE) * Math.ceil(index / 2);
+      // Get stable offset distance
+      const offsetDistance = tripOffsets.get(t.id) ?? 0;
       
       // Check if start arc should be rendered based on distance (only for PICKING_UP trips)
       const startDistance = Math.hypot(
@@ -163,12 +200,12 @@ export default function TripLayer({ canvasRef, trips, routes, zoom, offset }: {
       );
       if (t.status === 'PICKING_UP' && startDistance >= MIN_ARC_DISTANCE) {
         // start original -> start projection (dashed arc) - only for PICKING_UP
-        drawDashedArc(ctx, r.startPointProjection.originalPoint, r.startPointProjection.projectionPoint, zoom, offset, color, offsetDistance);
+        drawDashedArc(ctx, r.startPointProjection.originalPoint, r.startPointProjection.projectionPoint, view.current.zoom, view.current.offset, color, offsetDistance);
       }
       
       // polyline along the route from start projection through steps to destination projection
       const pts = buildRoutePolyline(r);
-      drawPolyline(ctx, pts, zoom, offset, color, offsetDistance);
+      drawPolyline(ctx, pts, view.current.zoom, view.current.offset, color, offsetDistance);
       
       // Check if destination arrow should be rendered based on distance
       const destDistance = Math.hypot(
@@ -177,21 +214,49 @@ export default function TripLayer({ canvasRef, trips, routes, zoom, offset }: {
       );
       if (destDistance >= MIN_ARC_DISTANCE) {
         // destination projection -> destination original (dashed line)
-        drawDashedLine(ctx, r.destinationPointProjection.projectionPoint, r.destinationPointProjection.originalPoint, zoom, offset, color, offsetDistance);
+        drawDashedLine(ctx, r.destinationPointProjection.projectionPoint, r.destinationPointProjection.originalPoint, view.current.zoom, view.current.offset, color, offsetDistance);
       }
     });
-  }
+  }, [trips, routes]);
 
-  useEffect(() => { render(); }, [trips, routes, zoom, offset]);
+  useEffect(() => {
+    const handleRedraw = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      view.current = detail;
+      render();
+    };
+    window.addEventListener('map-redraw', handleRedraw);
+    return () => window.removeEventListener('map-redraw', handleRedraw);
+  }, [render]);
+
+  useEffect(() => { render(); }, [render, zoom, offset]);
   useEffect(() => {
     function onBaseMapRendered() { render(); }
     window.addEventListener('basemap-rendered', onBaseMapRendered);
     return () => window.removeEventListener('basemap-rendered', onBaseMapRendered);
-  }, [trips, routes, zoom, offset]);
-  useEffect(() => () => { if (raf.current) cancelAnimationFrame(raf.current); }, []);
+  }, [render]);
+
+  useEffect(() => {
+    function resize() {
+      const canvas = canvasRef.current; const container = containerRef.current; if (!canvas || !container) return;
+      const dpr = window.devicePixelRatio || 1; const rect = container.getBoundingClientRect();
+      canvas.width = Math.floor(rect.width * dpr); canvas.height = Math.floor(rect.height * dpr);
+      canvas.style.width = `${rect.width}px`; canvas.style.height = `${rect.height}px`;
+      const ctx = canvas.getContext('2d'); if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      render();
+    }
+    const ro = new ResizeObserver(resize);
+    if (containerRef.current) ro.observe(containerRef.current);
+    resize();
+    return () => ro.disconnect();
+  }, [render]);
 
   return (
-    <>
+    <div ref={containerRef} className="w-full h-full absolute top-0 left-0 pointer-events-none">
+      <canvas
+        ref={canvasRef}
+        className="w-full h-full"
+      />
       {/* Matching trips: only user icon at start point */}
       {trips.filter(t => t.status === 'MATCHING').map(t => {
         const sp = worldToScreen({ x: t.startX, y: t.startY }, zoom, offset);
@@ -223,6 +288,6 @@ export default function TripLayer({ canvasRef, trips, routes, zoom, offset }: {
           </div>
         );
       })}
-    </>
+    </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import type { MapData, MapNode } from '../../services/mapService';
 import { drawPolygons } from './polygonRenderer';
 
@@ -96,36 +96,42 @@ function drawMap(ctx: CanvasRenderingContext2D, data: MapData, size: Vec2, zoom:
 }
 
 export type BaseMapProps = {
-  children: React.ReactNode;
-  data: MapData | null;
-  zoom: number;
-  offset: Vec2;
-  onWheel: (e: React.WheelEvent) => void;
-  onMouseDown: (e: React.MouseEvent) => void;
-  onMouseMove: (e: React.MouseEvent) => void;
-  onMouseUp: (e: React.MouseEvent) => void;
-  onMouseLeave: (e: React.MouseEvent) => void;
-  canvasRef: React.RefObject<HTMLCanvasElement | null>;
+  data?: MapData | null;
+  zoom?: number;
+  offset?: Vec2;
 };
 
 export default function BaseMap(props: BaseMapProps) {
-  const { data, zoom, offset, onWheel, onMouseDown, onMouseMove, onMouseUp, onMouseLeave, canvasRef } = props;
+  const { data, zoom = 13, offset = { x: 0, y: 0 } } = props;
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const view = useRef({ zoom, offset });
+  view.current = { zoom, offset };
 
   const render = useCallback(() => {
     const canvas = canvasRef.current; if (!canvas) return;
     const ctx = canvas.getContext('2d'); if (!ctx) return;
     const size = { x: canvas.clientWidth, y: canvas.clientHeight };
     if (data) {
-      drawMap(ctx, data, size, zoom, offset);
+      drawMap(ctx, data, size, view.current.zoom, view.current.offset);
     } else {
       ctx.fillStyle = BG; ctx.fillRect(0, 0, size.x, size.y);
     }
     // notify listeners that BaseMap finished rendering
   try { window.dispatchEvent(new CustomEvent('basemap-rendered')); } catch { /* noop */ }
-  }, [canvasRef, data, zoom, offset]);
+  }, [data]);
 
-  useEffect(() => { render(); }, [render]);
+  useEffect(() => {
+    const handleRedraw = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      view.current = detail;
+      render();
+    };
+    window.addEventListener('map-redraw', handleRedraw);
+    return () => window.removeEventListener('map-redraw', handleRedraw);
+  }, [render]);
+
+  useEffect(() => { render(); }, [render, props.zoom, props.offset]);
 
   useEffect(() => {
     function resize() {
@@ -140,20 +146,14 @@ export default function BaseMap(props: BaseMapProps) {
     if (containerRef.current) ro.observe(containerRef.current);
     resize();
     return () => ro.disconnect();
-  }, [canvasRef, render]);
+  }, [render]);
 
   return (
-    <div ref={containerRef} className="w-full h-full relative select-none">
+    <div ref={containerRef} className="w-full h-full absolute top-0 left-0 pointer-events-none">
       <canvas
         ref={canvasRef}
-        className="w-full h-full cursor-grab active:cursor-grabbing rounded-xl shadow-inner shadow-black/40"
-        onWheel={onWheel}
-        onMouseDown={onMouseDown}
-        onMouseMove={onMouseMove}
-        onMouseUp={onMouseUp}
-        onMouseLeave={onMouseLeave}
+        className="w-full h-full rounded-xl shadow-inner shadow-black/40"
       />
-      {props.children}
     </div>
   );
 }

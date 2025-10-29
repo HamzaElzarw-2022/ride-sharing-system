@@ -4,7 +4,7 @@ import type { DriverLocation, TripDto } from '../../services/monitoringService';
 import { worldToScreen } from './BaseMap';
 import type { Vec2 } from './BaseMap';
 
-export default function DriversLayer({ drivers, trips, zoom, offset, dragging = false }: { drivers: Record<string, DriverLocation>; trips: TripDto[]; zoom: number; offset: Vec2; dragging?: boolean; }) {
+export default function DriversLayer({ drivers, trips, zoom = 13, offset = { x: 0, y: 0 }, dragging = false }: { drivers: Record<string, DriverLocation>; trips: TripDto[]; zoom?: number; offset?: Vec2; dragging?: boolean; }) {
   // Avoid animating on first paint
   const firstPaintRef = useRef(true);
   // Keep a stable map of previous displayed angles per driver to ensure minimal rotation
