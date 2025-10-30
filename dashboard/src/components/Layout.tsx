@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { LayoutDashboard, Smartphone } from 'lucide-react';
 import { MonitoringProvider } from '../context/MonitoringContext';
 import githubLogo from '../assets/github-mark-white.svg';

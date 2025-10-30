@@ -3,7 +3,7 @@ import MapContainer from '../components/MapContainer';
 import { useAuth } from '../context/AuthContext';
 import AuthView from '../components/AuthView';
 import RiderPanel from '../components/RiderPanel';
-import type { Point, RouteStep } from '../services/routeService';
+import type { Point, RouteResponse } from '../services/routeService';
 import { fetchRoute } from '../services/routeService';
 import { requestTrip } from '../services/tripService';
 import RouteLayer from '../components/map/RouteLayer';
@@ -21,7 +21,7 @@ export default function Rider() {
   const [state, setState] = useState<RiderState>('initial');
   const [startPoint, setStartPoint] = useState<Point | null>(null);
   const [endPoint, setEndPoint] = useState<Point | null>(null);
-  const [route, setRoute] = useState<RouteStep[]>([]);
+  const [route, setRoute] = useState<RouteResponse| null>(null);
   const [isSelecting, setIsSelecting] = useState<'start' | 'end' | null>(null);
   const [tripId, setTripId] = useState<number | null>(null);
   const [driverLocation, setDriverLocation] = useState<DriverLocation | null>(null);
@@ -32,7 +32,7 @@ export default function Rider() {
     setState('initial');
     setStartPoint(null);
     setEndPoint(null);
-    setRoute([]);
+    setRoute(null);
     setIsSelecting(null);
     setTripId(null);
     setDriverLocation(null);
@@ -55,7 +55,7 @@ export default function Rider() {
     if (startPoint && endPoint) {
       fetchRoute({ startPoint, destinationPoint: endPoint })
         .then(routeResponse => {
-          setRoute(routeResponse.route);
+          setRoute(routeResponse);
           setState('route_selected');
         })
         .catch(error => console.error("Failed to fetch route", error));
@@ -142,7 +142,7 @@ export default function Rider() {
                 <ArrowLeft size={20} className="text-slate-800" />
               </button>
             )}
-            <MapContainer onMapClick={isSelecting ? handleMapClick : undefined}>
+            <MapContainer onMapClick={isSelecting ? handleMapClick : undefined} fitType='height'>
               <BaseMap />
               <RouteLayer route={route} start={startPoint} end={endPoint} />
               <DriverLayer position={driverLocation} />

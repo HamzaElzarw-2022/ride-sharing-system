@@ -1,6 +1,12 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
 import type { AuthResponse } from '../services/authService';
-import api from '../services/api';
+import api, { setupInterceptors } from '../services/api';
 
 interface AuthContextType {
   auth: AuthResponse | null;
@@ -12,6 +18,16 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [auth, setAuth] = useState<AuthResponse | null>(null);
+
+  const logout = useCallback(() => {
+    setAuth(null);
+    localStorage.removeItem('auth');
+    delete api.defaults.headers.common['Authorization'];
+  }, []);
+
+  useEffect(() => {
+    setupInterceptors(logout);
+  }, [logout]);
 
   useEffect(() => {
     const storedAuth = localStorage.getItem('auth');
@@ -26,12 +42,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAuth(data);
     localStorage.setItem('auth', JSON.stringify(data));
     api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-  };
-
-  const logout = () => {
-    setAuth(null);
-    localStorage.removeItem('auth');
-    delete api.defaults.headers.common['Authorization'];
   };
 
   return (

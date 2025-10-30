@@ -3,13 +3,15 @@ import type { Vec2 } from './map/BaseMap';
 import { fetchMap } from '../services/mapService';
 import type { MapData } from '../services/mapService';
 import { useMapInteractions } from '../hooks/useMapInteractions';
+import type { FitType } from './map/BaseMap';
 
 interface MapContainerProps {
   children?: React.ReactNode;
   onMapClick?: (point: Vec2) => void;
+  fitType?: FitType;
 }
 
-export default function MapContainer({ children, onMapClick }: MapContainerProps) {
+export default function MapContainer({ children, onMapClick, fitType }: MapContainerProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [data, setData] = useState<MapData | null>(null);
   const {
@@ -23,7 +25,7 @@ export default function MapContainer({ children, onMapClick }: MapContainerProps
     onMouseLeave,
     fitMap,
     setZoom,
-  } = useMapInteractions(data, containerRef);
+  } = useMapInteractions(data, containerRef, fitType);
 
   // Fetch map
   useEffect(() => {
@@ -66,7 +68,7 @@ export default function MapContainer({ children, onMapClick }: MapContainerProps
       <div className="absolute bottom-3 right-3 flex gap-2">
         <button className="px-2 py-1 rounded bg-white/10 text-white border border-white/20 hover:bg-white/20" onClick={() => setZoom((z) => Math.min(5, z * 1.2))}>+</button>
         <button className="px-2 py-1 rounded bg-white/10 text-white border border-white/20 hover:bg-white/20" onClick={() => setZoom((z) => Math.max(0.2, z / 1.2))}>-</button>
-        <button className="px-2 py-1 rounded bg-white/10 text-white border border-white/20 hover:bg-white/20" onClick={fitMap}>Fit</button>
+        <button className="px-2 py-1 rounded bg-white/10 text-white border border-white/20 hover:bg-white/20" onClick={() => fitMap(fitType)}>Fit</button>
       </div>
     </div>
   );

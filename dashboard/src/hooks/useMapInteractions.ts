@@ -1,14 +1,18 @@
 import { useState, useRef, useEffect, useCallback, type RefObject } from 'react';
 import type { MapData } from '../services/mapService';
-import { fitView, type Vec2 } from '../components/map/BaseMap';
+import { fitView, type FitType, type Vec2 } from '../components/map/BaseMap';
 
-export const useMapInteractions = (data: MapData | null, containerRef: RefObject<HTMLElement | null>) => {
+export const useMapInteractions = (
+  data: MapData | null,
+  containerRef: RefObject<HTMLElement | null>,
+  fitType: FitType = 'normal'
+) => {
   const [zoom, setZoom] = useState(13);
   const [offset, setOffset] = useState<Vec2>({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const lastPos = useRef<Vec2>({ x: 0, y: 0 });
 
-  const setView = useCallback((newView: { zoom: number, offset: Vec2 }) => {
+  const setView = useCallback((newView: { zoom: number; offset: Vec2 }) => {
     setZoom(newView.zoom);
     setOffset(newView.offset);
   }, []);
@@ -18,11 +22,11 @@ export const useMapInteractions = (data: MapData | null, containerRef: RefObject
     if (data && containerRef.current) {
       const size = { x: containerRef.current.clientWidth, y: containerRef.current.clientHeight };
       if (size.x > 0 && size.y > 0) {
-        const fit = fitView(data.nodes, size);
+        const fit = fitView(data.nodes, size, fitType);
         setView(fit);
       }
     }
-  }, [data, containerRef, setView]);
+  }, [data, containerRef, setView, fitType]);
 
   function onWheel(e: React.WheelEvent) {
     e.preventDefault();
@@ -63,10 +67,10 @@ export const useMapInteractions = (data: MapData | null, containerRef: RefObject
     }
   }
 
-  function fitMap() {
+  function fitMap(fitType: FitType = 'normal') {
     if (!data || !containerRef.current) return;
     const size = { x: containerRef.current.clientWidth, y: containerRef.current.clientHeight };
-    const fit = fitView(data.nodes, size);
+    const fit = fitView(data.nodes, size, fitType);
     setView(fit);
   }
 

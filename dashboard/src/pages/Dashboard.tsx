@@ -16,7 +16,7 @@ export default function Dashboard() {
     <div className="flex w-full h-full">
       <Sidebar />
       <div className="flex-1 h-full overflow-hidden relative">
-        <MapContainer>
+        <MapContainer  fitType='width'>
           <BaseMap />
           <TripLayer trips={trips} routes={routes} />
           <DriversLayer drivers={drivers} trips={trips} />
