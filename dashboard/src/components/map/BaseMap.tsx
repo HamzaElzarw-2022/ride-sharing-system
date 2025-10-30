@@ -4,21 +4,46 @@ import { drawPolygons } from './polygonRenderer';
 
 export type Vec2 = { x: number; y: number };
 
+export type FitType = 'normal' | 'width' | 'height';
+
 // eslint-disable-next-line react-refresh/only-export-components
-export function fitView(nodes: MapNode[], canvasSize: Vec2): { zoom: number; offset: Vec2 } {
+export function fitView(
+  nodes: MapNode[],
+  canvasSize: Vec2,
+  fitType: FitType = 'normal'
+): { zoom: number; offset: Vec2 } {
   if (!nodes.length) return { zoom: 1, offset: { x: 0, y: 0 } };
-  const minX = Math.min(...nodes.map(n => n.x));
-  const minY = Math.min(...nodes.map(n => n.y));
-  const maxX = Math.max(...nodes.map(n => n.x));
-  const maxY = Math.max(...nodes.map(n => n.y));
-  // Use smaller, responsive padding to reduce empty space on sides
-  const padding = Math.max(8, Math.min(24, Math.floor(Math.min(canvasSize.x, canvasSize.y) * 0.01)));
-  const width = maxX - minX || 1;
-  const height = maxY - minY || 1;
-  const zoomX = (canvasSize.x - padding * 2) / width;
-  const zoomY = (canvasSize.y - padding * 2) / height;
-  const zoom = Math.max(0.1, Math.min(zoomX, zoomY));
-  const offset: Vec2 = { x: minX - padding / zoom, y: minY - padding / zoom };
+  const minX = Math.min(...nodes.map((n) => n.x));
+  const minY = Math.min(...nodes.map((n) => n.y));
+  const maxX = Math.max(...nodes.map((n) => n.x));
+  const maxY = Math.max(...nodes.map((n) => n.y));
+  const contentWidth = maxX - minX || 1;
+  const contentHeight = maxY - minY || 1;
+  const zoomX = canvasSize.x / contentWidth;
+  const zoomY = canvasSize.y / contentHeight;
+
+  let zoom: number;
+  switch (fitType) {
+    case 'width':
+      zoom = zoomX;
+      break;
+    case 'height':
+      zoom = zoomY;
+      break;
+    case 'normal':
+    default:
+      zoom = Math.max(0.1, Math.min(zoomX, zoomY));
+      break;
+  }
+  zoom = Math.max(0.1, zoom) * 1.05; // 5% larger to hide bezels
+
+  const newContentWidth = canvasSize.x / zoom;
+  const newContentHeight = canvasSize.y / zoom;
+
+  const offsetX = minX - (newContentWidth - contentWidth) / 2;
+  const offsetY = minY - (newContentHeight - contentHeight) / 2;
+
+  const offset: Vec2 = { x: offsetX, y: offsetY };
   return { zoom, offset };
 }
 

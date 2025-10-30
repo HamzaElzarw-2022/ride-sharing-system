@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ListOrdered, MapPinned, Car } from 'lucide-react';
 import SidebarEventsTab from './sidebar/SidebarEventsTab';
 import SidebarTripsTab from './sidebar/SidebarTripsTab';
@@ -16,12 +16,21 @@ const TABS: { id: SidebarActiveTab, label: string, icon: React.ElementType }[] =
 
 export default function Sidebar() {
     const [activeTab, setActiveTab] = useState<SidebarActiveTab>('events');
-    const { setSelectedTripId } = useMonitoring();
+    const { setSelectedTripId, trips, drivers } = useMonitoring();
 
     function handleOpenTrip(tripId: number) {
         setSelectedTripId(tripId);
         setActiveTab('tripDetails');
     }
+
+    const tripsCount = trips.length;
+
+    const { idleDriversCount, totalDriversCount } = useMemo(() => {
+        const totalDrivers = Object.keys(drivers).length;
+        const busyDriverIds = new Set(trips.filter(t => t.status === 'STARTED' || t.status === 'PICKING_UP').map(t => t.driverId));
+        const idleDrivers = totalDrivers - busyDriverIds.size;
+        return { idleDriversCount: idleDrivers, totalDriversCount: totalDrivers };
+    }, [drivers, trips]);
 
     const currentTab = TABS.find(t => t.id === activeTab);
 
@@ -52,15 +61,19 @@ export default function Sidebar() {
                 <h2 className="text-sm font-semibold text-slate-300">
                     {activeTab === 'tripDetails' ? 'Trip Details' : currentTab?.label}
                 </h2>
+                {activeTab === 'trips' && <span className="text-sm text-slate-400">({tripsCount})</span>}
+                {activeTab === 'drivers' && <span className="text-sm text-slate-400">({idleDriversCount} idle / {totalDriversCount} total)</span>}
                 {activeTab === 'tripDetails' && (
                     <button onClick={() => setActiveTab('trips')} className="ml-auto text-xs text-slate-400 hover:text-white">Back to trips</button>
                 )}
             </div>
 
-            {activeTab === 'events' && <SidebarEventsTab />}
-            {activeTab === 'trips' && <SidebarTripsTab onOpenTrip={handleOpenTrip} />}
-            {activeTab === 'drivers' && <SidebarDriversTab />}
-            {activeTab === 'tripDetails' && <SidebarTripDetailsTab onBack={() => setActiveTab('trips')} />}
+            <div className="overflow-y-auto flex-grow custom-scrollbar">
+                {activeTab === 'events' && <SidebarEventsTab />}
+                {activeTab === 'trips' && <SidebarTripsTab onOpenTrip={handleOpenTrip} />}
+                {activeTab === 'drivers' && <SidebarDriversTab />}
+                {activeTab === 'tripDetails' && <SidebarTripDetailsTab onBack={() => setActiveTab('trips')} />}
+            </div>
         </aside>
     );
 }

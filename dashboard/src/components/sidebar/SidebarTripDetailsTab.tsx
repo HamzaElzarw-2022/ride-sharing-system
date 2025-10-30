@@ -34,7 +34,7 @@ export default function SidebarTripDetailsTab({ onBack }: { onBack: () => void }
           {trip.status}
         </div>
       </div>
-      <div className="p-3 space-y-3 overflow-auto">
+      <div className="p-3 space-y-3 overflow-auto custom-scrollbar">
         <div className="text-[12px] text-slate-300 flex items-center gap-2"><User size={14} className="text-yellow-300"/> Rider #{trip.riderId}</div>
         {trip.driverId != null && (
           <div className="text-[12px] text-slate-300 flex items-center gap-2"><Car size={14} className="text-emerald-300"/> Driver #{trip.driverId}</div>

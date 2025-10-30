@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef } from 'react';
-import type { Point, RouteStep } from '../../services/routeService';
+import type { Point, RouteResponse } from '../../services/routeService';
 
 interface RouteLayerProps {
-  route: RouteStep[];
+  route: RouteResponse| null;
   start: Point | null;
   end: Point | null;
   zoom?: number;
@@ -14,18 +14,27 @@ export default function RouteLayer({ route, start, end, zoom = 13, offset = { x:
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const draw = useCallback((ctx: CanvasRenderingContext2D) => {
+    if(route === null) {
+      return;
+    }
+
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
     // Draw route
-    if (route.length > 0) {
+    if (route.route.length > 0) {
+      const fullRoute = [
+        route.startPointProjection.projectionPoint,
+        ...route.route.map((step) => ({ x: step.x, y: step.y })),
+        route.destinationPointProjection.projectionPoint,
+      ];
       ctx.strokeStyle = '#3b82f6';
       ctx.lineWidth = 4;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       ctx.beginPath();
-      ctx.moveTo((route[0].x - offset.x) * zoom, (route[0].y - offset.y) * zoom);
-      for (let i = 1; i < route.length; i++) {
-        ctx.lineTo((route[i].x - offset.x) * zoom, (route[i].y - offset.y) * zoom);
+      ctx.moveTo((fullRoute[0].x - offset.x) * zoom, (fullRoute[0].y - offset.y) * zoom);
+      for (let i = 1; i < fullRoute.length; i++) {
+        ctx.lineTo((fullRoute[i].x - offset.x) * zoom, (fullRoute[i].y - offset.y) * zoom);
       }
       ctx.stroke();
     }
