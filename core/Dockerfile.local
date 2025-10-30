@@ -1,14 +1,20 @@
-FROM eclipse-temurin:21-jdk AS build
-WORKDIR /workspace/app
+FROM eclipse-temurin:21-jdk AS builder
+WORKDIR /builder
 
-COPY . .
+COPY gradlew build.gradle.kts settings.gradle.kts ./
+COPY gradle ./gradle
+COPY src ./src
 RUN ./gradlew bootJar -x test
-RUN mkdir -p build/dependency && (cd build/dependency; jar -xf ../libs/*.jar)
+
+RUN cp build/libs/*.jar application.jar
+RUN java -Djarmode=tools -jar application.jar extract --layers --destination extracted
 
 FROM eclipse-temurin:21-jre
-VOLUME /tmp
-ARG DEPENDENCY=/workspace/app/build/dependency
-COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
-COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
-COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
-ENTRYPOINT ["java","-cp","app:app/lib/*","com.rss.core.CoreApplication"]
+WORKDIR /application
+
+COPY --from=builder /builder/extracted/dependencies/ ./
+COPY --from=builder /builder/extracted/snapshot-dependencies/ ./
+COPY --from=builder /builder/extracted/spring-boot-loader/ ./
+COPY --from=builder /builder/extracted/application/ ./
+
+ENTRYPOINT ["java", "-jar", "application.jar"]
