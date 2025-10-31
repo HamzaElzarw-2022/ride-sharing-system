@@ -12,7 +12,7 @@ function App() {
   }, []);
 
   return (
-    <Router>
+    <Router basename="/ride-sharing-system">
       <AuthProvider>
         <Layout>
           <Routes>
