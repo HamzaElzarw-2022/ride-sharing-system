@@ -6,6 +6,6 @@ export default defineConfig({
   base: '/ride-sharing-system/',
   plugins: [react()],
   define: {
-    'process.env.VITE_API_BASE_URL': JSON.stringify(process.env.VITE_API_BASE_URL)
+    'import.meta.env.VITE_API_BASE_URL': JSON.stringify(process.env.VITE_API_BASE_URL)
   }
 })
