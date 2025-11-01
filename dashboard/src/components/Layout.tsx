@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { LayoutDashboard, Smartphone } from 'lucide-react';
 import { MonitoringProvider } from '../context/MonitoringContext';
 import githubLogo from '../assets/github-mark-white.svg';
@@ -27,14 +27,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
             <nav className="flex flex-col items-center gap-3">
               {navItems.map((item) => (
-                <a
+                <Link
                   key={item.name}
-                  href={item.href}
+                  to={item.href}
                   className={`p-2 rounded-lg transition-colors border ${location.pathname === item.href ? 'bg-slate-800 text-white border-slate-600' : 'bg-transparent text-slate-300 border-slate-700 hover:bg-slate-800/50'}`}
                   title={item.name}
                 >
                   <item.icon size={22} />
-                </a>
+                </Link>
               ))}
             </nav>
           </div>

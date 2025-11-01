@@ -1,4 +1,5 @@
 import api from './api';
+import { API_HOST } from './api';
 
 export type TripStatus = 'MATCHING' | 'PICKING_UP' | 'STARTED' | 'COMPLETED' | 'CANCELLED' | 'NO_DRIVERS_MATCHED';
 
@@ -52,7 +53,7 @@ export type MonitoringMessage =
     };
 
 export function connectMonitoring(onMessage: (msg: MonitoringMessage) => void): WebSocket {
-  const url = new URL('ws://localhost:8080/ws/monitoring');
+  const url = new URL(`ws://${API_HOST}/ws/monitoring`);
   const ws = new WebSocket(url);
   ws.onmessage = (ev) => {
     try {

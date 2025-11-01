@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Rider from './pages/Rider';
@@ -12,7 +12,7 @@ function App() {
   }, []);
 
   return (
-    <Router basename="/ride-sharing-system">
+    <Router>
       <AuthProvider>
         <Layout>
           <Routes>

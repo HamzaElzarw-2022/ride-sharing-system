@@ -1,4 +1,5 @@
 import { getToken } from './authService';
+import { API_HOST } from './api';
 
 export type TripMatchedPayload = {
   tripId: number;
@@ -31,7 +32,7 @@ export type TripMessage =
 
 export function connectTrip(tripId: number, onMessage: (msg: TripMessage) => void): WebSocket {
   const token = getToken();
-  const wsUrl = `ws://localhost:8080/ws/trip/${tripId}${token ? `?token=${token}` : ''}`;
+  const wsUrl = `ws://${API_HOST}/ws/trip/${tripId}${token ? `?token=${token}` : ''}`;
   console.log(`[TripWS] attempting to connect for trip ${tripId}`);
   const ws = new WebSocket(wsUrl);
 
