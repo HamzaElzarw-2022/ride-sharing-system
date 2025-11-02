@@ -32,7 +32,7 @@ export type TripMessage =
 
 export function connectTrip(tripId: number, onMessage: (msg: TripMessage) => void): WebSocket {
   const token = getToken();
-  const wsUrl = `ws://${API_HOST}/ws/trip/${tripId}${token ? `?token=${token}` : ''}`;
+  const wsUrl = `wss://${API_HOST}/ws/trip/${tripId}${token ? `?token=${token}` : ''}`;
   console.log(`[TripWS] attempting to connect for trip ${tripId}`);
   const ws = new WebSocket(wsUrl);
 

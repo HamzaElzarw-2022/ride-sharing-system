@@ -2,7 +2,7 @@ import axios from 'axios';
 export const API_HOST = import.meta.env.VITE_API_HOST || 'localhost:8080';
 
 const api = axios.create({
-  baseURL: `http://${API_HOST}/api`,
+  baseURL: `https://${API_HOST}/api`,
   // No auth headers; endpoints are public
 });
 

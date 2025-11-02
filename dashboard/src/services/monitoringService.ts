@@ -53,7 +53,7 @@ export type MonitoringMessage =
     };
 
 export function connectMonitoring(onMessage: (msg: MonitoringMessage) => void): WebSocket {
-  const url = new URL(`ws://${API_HOST}/ws/monitoring`);
+  const url = new URL(`wss://${API_HOST}/ws/monitoring`);
   const ws = new WebSocket(url);
   ws.onmessage = (ev) => {
     try {
