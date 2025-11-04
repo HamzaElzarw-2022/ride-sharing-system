@@ -4,9 +4,11 @@ import com.rss.core.trip.domain.event.TripCreatedEvent;
 import com.rss.core.trip.domain.event.TripEndedEvent;
 import com.rss.core.trip.domain.event.TripMatchedEvent;
 import com.rss.core.trip.domain.event.TripStartedEvent;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+@Profile("debug")
 @Component
 public class EventsListener {
 

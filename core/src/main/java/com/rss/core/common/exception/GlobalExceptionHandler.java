@@ -88,7 +88,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(
             Exception ex, HttpServletRequest request) {
-        log.error(ex.getMessage(), ex);
+        log.error(ex.getMessage());
         return ResponseEntity
                 .status(500)
                 .body(createErrorResponse(ex, request, 500));
